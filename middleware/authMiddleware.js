@@ -1,20 +1,19 @@
 const jwt = require('jsonwebtoken');
-const User = require('../models/User');
 
-const authMiddleware = async (req, res, next) => {
+// Middle ware function
+const authMiddleware = (req, res, next) => {
   const token = req.header('x-auth-token');
-
-  if (!token) {
-    return res.status(401).json({ msg: 'No token, authorization denied' });
-  }
-
+  if (!token)
+    return res.status(401).json({ message: 'Access denied. No token passed.' });
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = await User.findById(decoded.user.id);
+    req.body.user = decoded;
     next();
-  } catch (err) {
-    res.status(401).json({ msg: 'Token is not valid' });
+  } catch (ex) {
+    res.status(400).json({ message: 'Invalid Token.' });
   }
 };
 
 module.exports = authMiddleware;
+
+// This middleware function should be applied on those api endpoints which is going to be protected.

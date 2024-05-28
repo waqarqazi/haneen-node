@@ -1,17 +1,24 @@
 require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
-const bodyParser = require('body-parser');
+// const bodyParser = require('body-parser');
+const app = express();
+const cors = require('cors');
 const errorHandler = require('./middleware/errorMiddleware'); // Import directly as errorHandler
 const routes = require('./routes'); // Import your routes
-const app = express();
 
 // Set strictQuery to false to prepare for Mongoose 7
 mongoose.set('strictQuery', false);
 
+app.use(
+  cors({
+    origin: true,
+  }),
+);
+app.use(express.json({ limit: '50mb' }));
 // Middleware
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: false }));
+// app.use(bodyParser.json());
+// app.use(bodyParser.urlencoded({ extended: false }));
 
 // Use routes
 app.use('/api', routes); // Ensure routes is correctly imported and used
@@ -21,6 +28,16 @@ app.use(errorHandler); // Use the errorHandler middleware
 
 // Start the server
 const PORT = process.env.PORT || 5000;
+
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).send({ message: 'Internal server error' });
+});
+
+app.get('*', (req, res) => {
+  console.log('Status runing');
+  return res.status(200).send('Up & Running');
+});
 
 // Connect to MongoDB
 mongoose
@@ -36,5 +53,5 @@ mongoose
   })
   .catch(err => {
     // Pass the error to the errorHandler middleware
-    errorHandler(err, req, res, next);
+    console.log('err', err);
   });

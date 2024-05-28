@@ -1,19 +1,22 @@
 const express = require('express');
+const auth = require('../middleware/authMiddleware.js');
 const {
   getAllUsers,
   createUser,
   getUserById,
   updateUser,
   deleteUser,
+  getProfile,
 } = require('../controllers/userController');
 
 const router = express.Router();
 
 // Define routes and attach controller functions
-router.get('/', getAllUsers);
-router.post('/', createUser);
-router.get('/:id', getUserById);
-router.put('/:id', updateUser);
-router.delete('/:id', deleteUser);
+router.route('/profile').get(auth, getProfile);
+router.route('/').get(getAllUsers);
+router.route('/').post(createUser);
+router.route('/:id').get(getUserById);
+router.route('/:id').put(updateUser);
+router.route('/:id').delete(deleteUser);
 
 module.exports = router;

@@ -1,9 +1,11 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const _ = require('lodash');
-const User = require('../models/User');
+const User = require('../../models/User.js');
 
-const ErrorResponse = require('../utils/errorResponse.js');
+const ErrorResponse = require('../../utils/errorResponse.js');
+const { generateUniqueUsername } = require('../../utils/helpers.js');
+const { sendOTP } = require('./helper.js');
 // Register User
 const register = async (req, res) => {
   const { username, email, password } = req.body;
@@ -23,6 +25,45 @@ const register = async (req, res) => {
       username: username.toLowerCase(),
       email: email.toLowerCase(),
       password: passwordHash,
+    });
+
+    const user = await newUser.save();
+    let sanitizedUser = _.omit(user.toObject(), 'password');
+
+    return res.json({ user: sanitizedUser });
+  } catch (error) {
+    console.log('error', error);
+    return res.status(500).send(error);
+  }
+};
+const signUpStepZero = async (req, res) => {
+  try {
+    if (req?.body?.ph_number) {
+      const prevUser = await User.findOne({ ph_number: req.body.ph_number });
+      if (prevUser) {
+        return res.status(401).json({ error: 'Phone Already Exist' });
+      }
+      const username = await generateUniqueUsername('@');
+      const newUser = new User({
+        ph_number: req.body.ph_number.toLowerCase(),
+        username,
+      });
+
+      const user = await newUser.save();
+      let sanitizedUser = _.omit(user.toObject(), 'password');
+      console.log('sanitizedUser', sanitizedUser);
+      const otpDetails = await sendOTP(sanitizedUser?.ph_number);
+      return res.json({ ...{ user: sanitizedUser, otpDetails } });
+    }
+    const prevUserEmail = await User.findOne({ email: req.body.email });
+    if (prevUserEmail) {
+      return res.status(401).json({ error: 'Email Already Exist' });
+    }
+    // const passwordHash = await bcrypt.hash(password, 10);
+    const username = await generateUniqueUsername('@');
+    const newUser = new User({
+      email: req.body.email,
+      username,
     });
 
     const user = await newUser.save();
@@ -78,4 +119,5 @@ const login = async (req, res) => {
 module.exports = {
   register,
   login,
+  signUpStepZero,
 };

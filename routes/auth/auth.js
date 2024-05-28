@@ -1,7 +1,7 @@
 const express = require('express');
 
 const router = express.Router();
-const authController = require('../../controllers/authController.js');
+const authController = require('../../controllers/auth');
 const {
   validateLogin,
   validateRegister,
@@ -10,9 +10,8 @@ const validator = require('../../middleware/validator.js');
 // @route    POST api/auth/register
 // @desc     Register user
 // @access   Public
-router
-  .route('/register')
-  .post(validator(validateRegister, 'body'), authController.register);
+router.route('/register').post(validator(validateRegister, 'body'));
+router.route('/signup-step-zero').post(authController.signUpStepZero);
 
 // @route    POST api/auth/login
 // @desc     Login user

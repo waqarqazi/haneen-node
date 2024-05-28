@@ -11,7 +11,7 @@ const getAllUsers = async (req, res, next) => {
 };
 
 // Get user by ID
-const getUserById = async (req, res) => {
+const getUserById = async (req, res, next) => {
   try {
     const user = await User.findById(req.params.id);
     if (!user) {
@@ -20,6 +20,19 @@ const getUserById = async (req, res) => {
     res.json(user);
   } catch (err) {
     next(new ErrorResponse('Failed to retrieve', 500));
+  }
+};
+
+// Get user by ID
+const getProfile = async (req, res, next) => {
+  try {
+    const user = await User.findById({ _id: req.body.user._id });
+    if (!user) {
+      return res.status(404).json({ msg: 'User not found' });
+    }
+    return res.json({ user });
+  } catch (err) {
+    return res.status(500).send(err);
   }
 };
 
@@ -36,7 +49,7 @@ const createUser = async (req, res, next) => {
 };
 
 // Update a user
-const updateUser = async (req, res) => {
+const updateUser = async (req, res, next) => {
   const { username, email, password } = req.body;
 
   try {
@@ -58,7 +71,7 @@ const updateUser = async (req, res) => {
 };
 
 // Delete a user
-const deleteUser = async (req, res) => {
+const deleteUser = async (req, res, next) => {
   try {
     let user = await User.findById(req.params.id);
 
@@ -78,4 +91,5 @@ module.exports = {
   getUserById,
   updateUser,
   deleteUser,
+  getProfile,
 };

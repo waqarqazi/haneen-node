@@ -30,11 +30,39 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "http://localhost:3000/api/users/1",
+              "raw": "http://localhost:3000/api/users/665580fc8058b8cfc1049979",
               "protocol": "http",
               "host": ["localhost"],
               "port": "3000",
-              "path": ["api", "users", "1"]
+              "path": ["api", "users", "665580fc8058b8cfc1049979"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "profile",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-auth-token",
+                "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NjU1ODBmYzgwNThiOGNmYzEwNDk5NzkiLCJpYXQiOjE3MTY4ODYzNTYsImV4cCI6MTc0ODQyMjM1Nn0.WdrtC4WDPxOtlmKrirCWwhcnCpu8CdbcOkMXbKS3DD4",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/api/users/profile",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "users", "profile"],
+              "query": [
+                {
+                  "key": "",
+                  "value": "",
+                  "disabled": true
+                }
+              ]
             }
           },
           "response": []
@@ -46,7 +74,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n  \"username\": \"john_doe123\",\r\n  \"email\": \"john.doe@example.com\",\r\n  \"password\": \"password123\",\r\n  \"first_name\": \"John\",\r\n  \"last_name\": \"Doe\",\r\n  \"date_of_birth\": \"1990-01-01\",\r\n  \"gender\": \"Male\",\r\n  \"sexual_orientation\": \"Straight\",\r\n  \"bio\": \"Lorem ipsum dolor sit amet, consectetur adipiscing elit.\",\r\n  \"profile_picture\": \"https://example.com/profile.jpg\",\r\n  \"interests\": [\"Hiking\", \"Reading\", \"Traveling\"],\r\n  \"location\": {\r\n    \"city\": \"New York\",\r\n    \"state\": \"NY\",\r\n    \"country\": \"USA\"\r\n  },\r\n  \"occupation\": \"Software Engineer\",\r\n  \"education\": \"Bachelor's Degree\",\r\n  \"height\": 180,\r\n  \"weight\": 75,\r\n  \"hobbies\": [\"Photography\", \"Cooking\", \"Gardening\"],\r\n  \"preferences\": {\r\n    \"preferred_age_range\": [25, 35],\r\n    \"preferred_gender\": \"Female\",\r\n    \"preferred_distance\": 50,\r\n    \"preferred_interests\": [\"Traveling\", \"Reading\"]\r\n  }\r\n}\r\n",
+              "raw": "{\r\n  \"username\": \"john_doe123\",\r\n  \"email\": \"john.doe@example.com\",\r\n  \"password\": \"password123\",\r\n  \"contact\":\"+923135664154\",\r\n  \"first_name\": \"John\",\r\n  \"last_name\": \"Doe\",\r\n  \"date_of_birth\": \"1990-01-01\",\r\n  \"gender\": \"Male\",\r\n  \"sexual_orientation\": \"Straight\",\r\n  \"bio\": \"Lorem ipsum dolor sit amet, consectetur adipiscing elit.\",\r\n  \"profile_picture\": \"https://example.com/profile.jpg\",\r\n  \"interests\": [\"Hiking\", \"Reading\", \"Traveling\"],\r\n  \"location\": {\r\n    \"city\": \"New York\",\r\n    \"state\": \"NY\",\r\n    \"country\": \"USA\"\r\n  },\r\n  \"occupation\": \"Software Engineer\",\r\n  \"education\": \"Bachelor's Degree\",\r\n  \"height\": 180,\r\n  \"weight\": 75,\r\n  \"hobbies\": [\"Photography\", \"Cooking\", \"Gardening\"],\r\n  \"preferences\": {\r\n    \"preferred_age_range\": [25, 35],\r\n    \"preferred_gender\": \"Female\",\r\n    \"preferred_distance\": 50,\r\n    \"preferred_interests\": [\"Traveling\", \"Reading\"]\r\n  }\r\n}\r\n",
               "options": {
                 "raw": {
                   "language": "json"
@@ -413,12 +441,77 @@
       "name": "Auth",
       "item": [
         {
+          "name": "Signup Flow",
+          "item": [
+            {
+              "name": "signup step0 Number",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n    \"ph_number\":\"+971553962773\"\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "http://localhost:3000/api/auth/signup-step-zero",
+                  "protocol": "http",
+                  "host": ["localhost"],
+                  "port": "3000",
+                  "path": ["api", "auth", "signup-step-zero"]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "signup step0 Email",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n    \"email\":\"ali12@gmail.com\"\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "http://localhost:3000/api/auth/signup-step-zero",
+                  "protocol": "http",
+                  "host": ["localhost"],
+                  "port": "3000",
+                  "path": ["api", "auth", "signup-step-zero"]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
           "name": "register",
           "request": {
-            "method": "GET",
+            "method": "POST",
             "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"username\":\"alikhan12\",\r\n    \"email\":\"alikhan@gmail.com\",\r\n    \"password\":\"abc@123\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
             "url": {
-              "raw": "/api/auth/register",
+              "raw": "http://localhost:3000/api/auth/register",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
               "path": ["api", "auth", "register"]
             }
           },
@@ -427,10 +520,22 @@
         {
           "name": "login",
           "request": {
-            "method": "GET",
+            "method": "POST",
             "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"usernameOrEmail\":\"alikhan@gmail.com\",\r\n    \"password\":\"abc@123\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
             "url": {
-              "raw": "/api/auth/login",
+              "raw": "http://localhost:3000/api/auth/login",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
               "path": ["api", "auth", "login"]
             }
           },

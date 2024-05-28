@@ -1,10 +1,12 @@
+/* eslint-disable */
 const mongoose = require('mongoose');
 const jwt = require('jsonwebtoken');
 
 const userSchema = new mongoose.Schema({
   username: { type: String, required: true, unique: true },
-  email: { type: String, required: true, unique: true },
-  password: { type: String, required: true },
+  email: { type: String, required: false, unique: false },
+  password: { type: String, required: false },
+  ph_number: { type: String, required: false },
   first_name: String,
   last_name: String,
   date_of_birth: Date,
