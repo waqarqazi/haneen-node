@@ -32,10 +32,21 @@ async function sendOTP(phoneNumber) {
     console.log(
       `OTP sent successfully to ${phoneNumber}. SID: ${response.sid}`,
     );
-    return `OTP sent successfully to ${phoneNumber}. SID: ${response.sid}`;
+    return response;
   } catch (error) {
     console.error('Error sending OTP:', error);
     return error;
   }
 }
-module.exports = { generateOtp, generatePromoCode, sendOTP };
+async function verifyOTP(phoneNumber, otp) {
+  try {
+    const response = await client.verify.v2
+      .services(TWILIO_SERVICE_SID)
+      .verificationChecks.create({ to: phoneNumber, code: otp });
+    return response;
+  } catch (error) {
+    console.error('Error sending OTP:', error);
+    return error;
+  }
+}
+module.exports = { generateOtp, generatePromoCode, sendOTP, verifyOTP };

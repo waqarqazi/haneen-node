@@ -12,6 +12,8 @@ const validator = require('../../middleware/validator.js');
 // @access   Public
 router.route('/register').post(validator(validateRegister, 'body'));
 router.route('/signup-step-zero').post(authController.signUpStepZero);
+router.route('/send-otp').post(authController.sendOtpApi);
+router.route('/verify-otp').post(authController.verifyOtpApi);
 
 // @route    POST api/auth/login
 // @desc     Login user

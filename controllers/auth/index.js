@@ -5,7 +5,7 @@ const User = require('../../models/User.js');
 
 const ErrorResponse = require('../../utils/errorResponse.js');
 const { generateUniqueUsername } = require('../../utils/helpers.js');
-const { sendOTP } = require('./helper.js');
+const { sendOTP, verifyOTP } = require('./helper.js');
 // Register User
 const register = async (req, res) => {
   const { username, email, password } = req.body;
@@ -36,6 +36,28 @@ const register = async (req, res) => {
     return res.status(500).send(error);
   }
 };
+const sendOtpApi = async (req, res) => {
+  try {
+    const prevUser = await User.findOne({ ph_number: req.body.ph_number });
+    if (prevUser) {
+      return res.json({ otp: 'test', detail: 'User Exist' });
+    }
+    return res.json({ otp: 'test' });
+  } catch (error) {
+    console.log('error', error);
+    return res.status(500).send(error);
+  }
+};
+const verifyOtpApi = async (req, res) => {
+  try {
+    const otpDetails = await verifyOTP(req.body.ph_number, req.body.otp);
+    return res.json({ otpDetails: otpDetails });
+  } catch (error) {
+    console.log('error', error);
+    return res.status(500).send(error);
+  }
+};
+
 const signUpStepZero = async (req, res) => {
   try {
     if (req?.body?.ph_number) {
@@ -52,7 +74,7 @@ const signUpStepZero = async (req, res) => {
       const user = await newUser.save();
       let sanitizedUser = _.omit(user.toObject(), 'password');
       console.log('sanitizedUser', sanitizedUser);
-      const otpDetails = await sendOTP(sanitizedUser?.ph_number);
+      const otpDetails = await sendOTP(sanitizedUser?.ph_number, '000000');
       return res.json({ ...{ user: sanitizedUser, otpDetails } });
     }
     const prevUserEmail = await User.findOne({ email: req.body.email });
@@ -120,4 +142,6 @@ module.exports = {
   register,
   login,
   signUpStepZero,
+  sendOtpApi,
+  verifyOtpApi,
 };

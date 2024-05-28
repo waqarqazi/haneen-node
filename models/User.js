@@ -6,7 +6,7 @@ const userSchema = new mongoose.Schema({
   username: { type: String, required: true, unique: true },
   email: { type: String, required: false, unique: false },
   password: { type: String, required: false },
-  ph_number: { type: String, required: false },
+  ph_number: { type: String, required: false, unique: true },
   first_name: String,
   last_name: String,
   date_of_birth: Date,
@@ -31,8 +31,10 @@ const userSchema = new mongoose.Schema({
     preferred_distance: Number,
     preferred_interests: [String],
   },
-  created_at: { type: Date, default: Date.now },
-  updated_at: { type: Date, default: Date.now },
+  otpVerified: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 userSchema.methods.generateAuthToken = function (expiresIn) {
