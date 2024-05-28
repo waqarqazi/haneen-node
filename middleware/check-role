@@ -1,0 +1,11 @@
+const checkRole =
+  (...roles) =>
+  (req, res, next) => {
+    if (roles.includes(req.body.user.userType)) {
+      next();
+    } else {
+      return res.status(403).json({ message: `You don't have enough access!` });
+    }
+  };
+
+module.exports = checkRole;

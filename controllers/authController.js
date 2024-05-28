@@ -1,84 +1,77 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const _ = require('lodash');
 const User = require('../models/User');
-const { check, validationResult } = require('express-validator');
+
 const ErrorResponse = require('../utils/errorResponse.js');
 // Register User
 const register = async (req, res) => {
   const { username, email, password } = req.body;
 
   try {
-    let user = await User.findOne({ email });
-
-    if (user) {
-      return res.status(400).json({ errors: [{ msg: 'User already exists' }] });
+    const prevUser = await User.findOne({ username });
+    if (prevUser) {
+      return res.status(401).json({ error: 'User Already Exist' });
     }
-
-    user = new User({
-      username,
-      email,
-      password,
+    const prevUserEmail = await User.findOne({ email });
+    if (prevUserEmail) {
+      return res.status(401).json({ error: 'Email Already Exist' });
+    }
+    const passwordHash = await bcrypt.hash(password, 10);
+    const newUser = new User({
+      ...req.body,
+      username: username.toLowerCase(),
+      email: email.toLowerCase(),
+      password: passwordHash,
     });
 
-    const salt = await bcrypt.genSalt(10);
-    user.password = await bcrypt.hash(password, salt);
+    const user = await newUser.save();
+    let sanitizedUser = _.omit(user.toObject(), 'password');
 
-    await user.save();
-
-    const payload = {
-      user: {
-        id: user.id,
-      },
-    };
-
-    jwt.sign(
-      payload,
-      process.env.JWT_SECRET,
-      { expiresIn: '5 days' },
-      (err, token) => {
-        if (err) throw err;
-        res.json({ token });
-      },
-    );
-  } catch (err) {
-    next(new ErrorResponse('Failed to retrieve', 500));
+    return res.json({ user: sanitizedUser });
+  } catch (error) {
+    console.log('error', error);
+    return res.status(500).send(error);
   }
 };
 
 // Login User
 const login = async (req, res) => {
-  const { email, password } = req.body;
-
   try {
-    let user = await User.findOne({ email });
+    const user = await User.findOne({
+      $or: [
+        { username: req.body.usernameOrEmail },
+        { email: req.body.usernameOrEmail },
+      ],
+    }).select('+password');
 
-    if (!user) {
-      return res.status(400).json({ errors: [{ msg: 'Invalid Credentials' }] });
-    }
+    if (!user)
+      return res.status(400).json({ error: 'Invalid userName or Password' });
 
-    const isMatch = await bcrypt.compare(password, user.password);
-
-    if (!isMatch) {
-      return res.status(400).json({ errors: [{ msg: 'Invalid Credentials' }] });
-    }
-
-    const payload = {
-      user: {
-        id: user.id,
-      },
-    };
-
-    jwt.sign(
-      payload,
-      process.env.JWT_SECRET,
-      { expiresIn: '5 days' },
-      (err, token) => {
-        if (err) throw err;
-        res.json({ token });
-      },
+    const validatePassword = await bcrypt.compare(
+      req.body.password,
+      user.password,
     );
-  } catch (err) {
-    next(new ErrorResponse('Failed to retrieve', 500));
+
+    if (!validatePassword)
+      return res.status(400).json({ error: 'Invalid userName or Password' });
+
+    // User disabled
+    // if (!user.status)
+    //   return res.status(401).json({ error: 'Your account is Inactive' });
+
+    const token = user.generateAuthToken();
+
+    let sanitizedUser = _.omit(user.toObject(), 'password');
+    console.log('sanitizedUser', sanitizedUser);
+    return res.status(200).json({
+      message: 'Auth Successful',
+      token,
+      user: sanitizedUser,
+    });
+  } catch (error) {
+    console.log('error', error);
+    return res.status(500).json({ status: false, error });
   }
 };
 
