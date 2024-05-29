@@ -1,6 +1,7 @@
 const express = require('express');
 
 const router = express.Router();
+const auth = require('../../middleware/authMiddleware.js');
 const authController = require('../../controllers/auth');
 const {
   validateLogin,
@@ -13,7 +14,8 @@ const validator = require('../../middleware/validator.js');
 router.route('/register').post(validator(validateRegister, 'body'));
 router.route('/signup-step-zero').post(authController.signUpStepZero);
 router.route('/send-otp').post(authController.sendOtpApi);
-router.route('/verify-otp').post(authController.verifyOtpApi);
+router.route('/verify-otp').post(auth, authController.verifyOtpApi);
+router.route('/add-user-details').post(auth, authController.addRemainDetails);
 
 // @route    POST api/auth/login
 // @desc     Login user

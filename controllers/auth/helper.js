@@ -32,7 +32,7 @@ async function sendOTP(phoneNumber) {
     console.log(
       `OTP sent successfully to ${phoneNumber}. SID: ${response.sid}`,
     );
-    return response;
+    return `OTP sent successfully to ${phoneNumber}. SID: ${response.sid}`;
   } catch (error) {
     console.error('Error sending OTP:', error);
     return error;

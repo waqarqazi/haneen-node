@@ -36,28 +36,6 @@ const register = async (req, res) => {
     return res.status(500).send(error);
   }
 };
-const sendOtpApi = async (req, res) => {
-  try {
-    const prevUser = await User.findOne({ ph_number: req.body.ph_number });
-    if (prevUser) {
-      return res.json({ otp: 'test', detail: 'User Exist' });
-    }
-    return res.json({ otp: 'test' });
-  } catch (error) {
-    console.log('error', error);
-    return res.status(500).send(error);
-  }
-};
-const verifyOtpApi = async (req, res) => {
-  try {
-    const otpDetails = await verifyOTP(req.body.ph_number, req.body.otp);
-    return res.json({ otpDetails: otpDetails });
-  } catch (error) {
-    console.log('error', error);
-    return res.status(500).send(error);
-  }
-};
-
 const signUpStepZero = async (req, res) => {
   try {
     if (req?.body?.ph_number) {
@@ -74,8 +52,9 @@ const signUpStepZero = async (req, res) => {
       const user = await newUser.save();
       let sanitizedUser = _.omit(user.toObject(), 'password');
       console.log('sanitizedUser', sanitizedUser);
-      const otpDetails = await sendOTP(sanitizedUser?.ph_number, '000000');
-      return res.json({ ...{ user: sanitizedUser, otpDetails } });
+      const otpDetails = await sendOTP(sanitizedUser?.ph_number);
+      const token = user.generateAuthToken();
+      return res.json({ user: sanitizedUser, token, otpDetails });
     }
     const prevUserEmail = await User.findOne({ email: req.body.email });
     if (prevUserEmail) {
@@ -95,6 +74,71 @@ const signUpStepZero = async (req, res) => {
   } catch (error) {
     console.log('error', error);
     return res.status(500).send(error);
+  }
+};
+const sendOtpApi = async (req, res) => {
+  try {
+    const prevUser = await User.findOne({ ph_number: req.body.ph_number });
+    if (prevUser) {
+      return res.json({ otp: 'test', detail: 'User Exist' });
+    }
+    return res.json({ otp: 'test' });
+  } catch (error) {
+    console.log('error', error);
+    return res.status(500).send(error);
+  }
+};
+const verifyOtpApi = async (req, res) => {
+  try {
+    const prevUser = await User.findOne({ ph_number: req.body.ph_number });
+    if (prevUser) {
+      if (prevUser.otpVerified) {
+        return res.json({ otpDetails: 'Already Verified' });
+      }
+    }
+    const otpDetails = await verifyOTP(req.body.ph_number, req.body.otp);
+    if (otpDetails.status == 'approved') {
+      const updatedUser = await User.findOneAndUpdate(
+        { ph_number: req.body.ph_number },
+        {
+          $set: { otpVerified: true },
+        },
+        {
+          new: true, // Return the updated document
+          upsert: true, // Create a new document if none is found
+          setDefaultsOnInsert: true, // Apply default values if a new document is created
+        },
+      )
+        .lean()
+        .exec();
+      return res.json({
+        otpDetails,
+        updatedUser,
+      });
+    }
+    return res.json({ otpDetails });
+  } catch (error) {
+    console.log('error', error);
+    return res.status(500).send(error);
+  }
+};
+const addRemainDetails = async (req, res) => {
+  console.log('id', req.body.user._id);
+  try {
+    const user = await User.findByIdAndUpdate(req.body.user._id, req.body, {
+      new: true, // Return the updated document
+      runValidators: true, // Validate the update operation
+    })
+      .lean()
+      .exec();
+
+    if (!user) {
+      return res.status(404).send({ message: 'User not found' });
+    }
+    return res.status(200).json({ user, success: true });
+  } catch (error) {
+    console.error('Error:', error);
+    return res.status(500).send({ message: 'Internal server error', error });
   }
 };
 
@@ -128,7 +172,7 @@ const login = async (req, res) => {
     let sanitizedUser = _.omit(user.toObject(), 'password');
     console.log('sanitizedUser', sanitizedUser);
     return res.status(200).json({
-      message: 'Auth Successful',
+      success: true,
       token,
       user: sanitizedUser,
     });
@@ -144,4 +188,5 @@ module.exports = {
   signUpStepZero,
   sendOtpApi,
   verifyOtpApi,
+  addRemainDetails,
 };

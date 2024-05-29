@@ -2,6 +2,13 @@
 const mongoose = require('mongoose');
 const jwt = require('jsonwebtoken');
 
+const locationSchema = new mongoose.Schema({
+  city: String,
+  state: String,
+  country: String,
+  latitude: Number,
+  longitude: Number,
+});
 const userSchema = new mongoose.Schema({
   username: { type: String, required: true, unique: true },
   email: { type: String, required: false, unique: false },
@@ -14,12 +21,9 @@ const userSchema = new mongoose.Schema({
   sexual_orientation: String,
   bio: String,
   profile_picture: String,
+  fcm: String,
   interests: [String],
-  location: {
-    city: String,
-    state: String,
-    country: String,
-  },
+  location: locationSchema,
   occupation: String,
   education: String,
   height: Number,
