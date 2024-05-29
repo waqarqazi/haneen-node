@@ -39,6 +39,8 @@ const userSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
+  resetPasswordOTP: String,
+  resetPasswordExpire: Date,
 });
 
 userSchema.methods.generateAuthToken = function (expiresIn) {

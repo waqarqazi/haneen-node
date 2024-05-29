@@ -1,3 +1,4 @@
+/* eslint-disable */
 const Like = require('../models/Like');
 const ErrorResponse = require('../utils/errorResponse.js');
 // Get all likes
@@ -6,7 +7,7 @@ const getAllLikes = async (req, res) => {
     const likes = await Like.find();
     res.json(likes);
   } catch (err) {
-    next(new ErrorResponse('Failed to retrieve', 500));
+    return res.status(500).json({ status: false, err });
   }
 };
 
@@ -19,14 +20,14 @@ const getLikeById = async (req, res) => {
     }
     res.json(like);
   } catch (err) {
-    next(new ErrorResponse('Failed to retrieve', 500));
+    return res.status(500).json({ status: false, err });
   }
 };
 
 // Create a new like
 const createLike = async (req, res) => {
-  const { user_id, liked_user_id } = req.body;
-
+  const { liked_user_id } = req.body;
+  let user_id = req.body.user._id;
   try {
     let like = new Like({
       user_id,
@@ -34,9 +35,9 @@ const createLike = async (req, res) => {
     });
 
     await like.save();
-    res.json(like);
+    return res.status(200).json({ status: true, like });
   } catch (err) {
-    next(new ErrorResponse('Failed to retrieve', 500));
+    return res.status(500).json({ status: false, err });
   }
 };
 
@@ -48,15 +49,15 @@ const updateLike = async (req, res) => {
     let like = await Like.findById(req.params.id);
 
     if (!like) {
-      return res.status(404).json({ msg: 'Like not found' });
+      return res.status(200).json({ msg: 'Like not found' });
     }
 
     like.liked_user_id = liked_user_id || like.liked_user_id;
 
     await like.save();
-    res.json(like);
+    return res.status(200).json({ status: true, like });
   } catch (err) {
-    next(new ErrorResponse('Failed to retrieve', 500));
+    return res.status(500).json({ status: false, err });
   }
 };
 
@@ -72,7 +73,7 @@ const deleteLike = async (req, res) => {
     await like.remove();
     res.json({ msg: 'Like removed' });
   } catch (err) {
-    next(new ErrorResponse('Failed to retrieve', 500));
+    return res.status(500).json({ status: false, err });
   }
 };
 module.exports = {

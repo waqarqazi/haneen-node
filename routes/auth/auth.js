@@ -16,6 +16,7 @@ router.route('/signup-step-zero').post(authController.signUpStepZero);
 router.route('/send-otp').post(authController.sendOtpApi);
 router.route('/verify-otp').post(auth, authController.verifyOtpApi);
 router.route('/add-user-details').post(auth, authController.addRemainDetails);
+router.route('/forgot-password').post(authController.forgotPassword);
 
 // @route    POST api/auth/login
 // @desc     Login user

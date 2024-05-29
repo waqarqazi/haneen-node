@@ -7,7 +7,7 @@ const client = require('twilio')(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, {
 });
 
 const generateOtp = async () => {
-  const nanoid = customAlphabet('0123456789', 4);
+  const nanoid = customAlphabet('0123456789', 6);
   const otp = await nanoid();
   return otp;
 };

@@ -1,20 +1,21 @@
 const express = require('express');
+
 const router = express.Router();
 const likeController = require('../controllers/likeController.js');
-
+const auth = require('../middleware/authMiddleware.js');
 // Get all likes
-router.get('/', likeController.getAllLikes);
+router.route('/').get(auth, likeController.getAllLikes);
 
 // Get like by ID
-router.get('/:id', likeController.getLikeById);
+router.route('/:id').get(auth, likeController.getLikeById);
 
 // Create a new like
-router.post('/', likeController.createLike);
+router.route('/').post(auth, likeController.createLike);
 
 // Update a like
-router.put('/:id', likeController.updateLike);
+router.route('/:id').put(auth, likeController.updateLike);
 
 // Delete a like
-router.delete('/:id', likeController.deleteLike);
+router.route('/:id').delete(auth, likeController.deleteLike);
 
 module.exports = router;

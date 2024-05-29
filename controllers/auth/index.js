@@ -1,11 +1,12 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const _ = require('lodash');
+const twilio = require('twilio');
 const User = require('../../models/User.js');
 
 const ErrorResponse = require('../../utils/errorResponse.js');
 const { generateUniqueUsername } = require('../../utils/helpers.js');
-const { sendOTP, verifyOTP } = require('./helper.js');
+const { sendOTP, verifyOTP, generateOtp } = require('./helper.js');
 // Register User
 const register = async (req, res) => {
   const { username, email, password } = req.body;
@@ -141,7 +142,29 @@ const addRemainDetails = async (req, res) => {
     return res.status(500).send({ message: 'Internal server error', error });
   }
 };
-
+const forgotPassword = async (req, res) => {
+  try {
+    const user = await User.findOne({ ph_number: req.body.ph_number });
+    if (!user) {
+      return res
+        .status(404)
+        .json({ success: false, message: 'User not found' });
+    }
+    const otp = await generateOtp();
+    const resetPasswordExpire = Date.now() + 3600000;
+    // Save the OTP and expiration to the user's record
+    user.resetPasswordOTP = otp;
+    user.resetPasswordExpire = resetPasswordExpire;
+    await user.save();
+    res.status(200).json({
+      success: true,
+      message: `Password reset OTP sent to mobile ${otp}`,
+    });
+  } catch (error) {
+    console.log('error', error);
+    return res.status(500).send(error);
+  }
+};
 // Login User
 const login = async (req, res) => {
   try {
@@ -155,10 +178,7 @@ const login = async (req, res) => {
     if (!user)
       return res.status(400).json({ error: 'Invalid userName or Password' });
 
-    const validatePassword = await bcrypt.compare(
-      req.body.password,
-      user.password,
-    );
+    const validatePassword = bcrypt.compare(req.body.password, user.password);
 
     if (!validatePassword)
       return res.status(400).json({ error: 'Invalid userName or Password' });
@@ -189,4 +209,5 @@ module.exports = {
   sendOtpApi,
   verifyOtpApi,
   addRemainDetails,
+  forgotPassword,
 };

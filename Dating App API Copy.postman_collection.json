@@ -73,7 +73,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n  \"email\": \"john.doe@example.com\",\r\n  \"password\": \"password123\",\r\n  \"contact\":\"+923135664154\",\r\n  \"first_name\": \"John\",\r\n  \"last_name\": \"Doe\",\r\n  \"date_of_birth\": \"1990-01-01\",\r\n  \"gender\": \"Male\",\r\n  \"sexual_orientation\": \"Straight\",\r\n  \"bio\": \"Lorem ipsum dolor sit amet, consectetur adipiscing elit.\",\r\n  \"profile_picture\": \"https://example.com/profile.jpg\",\r\n  \"interests\": [\"Hiking\", \"Reading\", \"Traveling\"],\r\n  \"location\": {\r\n    \"city\": \"New York\",\r\n    \"state\": \"NY\",\r\n    \"country\": \"USA\",\r\n     \"latitude\":0,\r\n    \"longitude\":0\r\n  },\r\n  \"occupation\": \"Software Engineer\",\r\n  \"education\": \"Bachelor's Degree\",\r\n  \"height\": 180,\r\n  \"weight\": 75,\r\n  \"hobbies\": [\"Photography\", \"Cooking\", \"Gardening\"],\r\n  \"preferences\": {\r\n    \"preferred_age_range\": [25, 35],\r\n    \"preferred_gender\": \"Female\",\r\n    \"preferred_distance\": 50,\r\n    \"preferred_interests\": [\"Traveling\", \"Reading\"]\r\n  }\r\n}\r\n",
+              "raw": "{\r\n  \"username\":\"dsfasdfa\",\r\n  \"email\": \"john.doe@example.com\",\r\n  \"password\": \"password123\",\r\n  \"contact\":\"+923135664154\",\r\n  \"first_name\": \"John\",\r\n  \"last_name\": \"Doe\",\r\n  \"date_of_birth\": \"1990-01-01\",\r\n  \"gender\": \"Male\",\r\n  \"sexual_orientation\": \"Straight\",\r\n  \"bio\": \"Lorem ipsum dolor sit amet, consectetur adipiscing elit.\",\r\n  \"profile_picture\": \"https://example.com/profile.jpg\",\r\n  \"interests\": [\"Hiking\", \"Reading\", \"Traveling\"],\r\n  \"location\": {\r\n    \"city\": \"New York\",\r\n    \"state\": \"NY\",\r\n    \"country\": \"USA\",\r\n     \"latitude\":0,\r\n    \"longitude\":0\r\n  },\r\n  \"occupation\": \"Software Engineer\",\r\n  \"education\": \"Bachelor's Degree\",\r\n  \"height\": 180,\r\n  \"weight\": 75,\r\n  \"hobbies\": [\"Photography\", \"Cooking\", \"Gardening\"],\r\n  \"preferences\": {\r\n    \"preferred_age_range\": [25, 35],\r\n    \"preferred_gender\": \"Female\",\r\n    \"preferred_distance\": 50,\r\n    \"preferred_interests\": [\"Traveling\", \"Reading\"]\r\n  }\r\n}\r\n",
               "options": {
                 "raw": {
                   "language": "json"
@@ -329,13 +329,153 @@
       "name": "Likes",
       "item": [
         {
-          "name": "likes",
+          "name": "create",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "x-auth-token",
+                "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NjU3MGYxNTlhMzYzYmI5MTRhOGE0MjkiLCJpYXQiOjE3MTY5ODIxMzUsImV4cCI6MTc0ODUxODEzNX0.K65LXVA1z08wNHkVqYr1QoMYA9MoNglri4e2PDrw_OQ",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"liked_user_id\": \"6656f56aa6416349d08dc094\",\r\n  \"liked_at\": \"2024-05-29T12:00:00Z\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3000/api/likes",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "likes"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GetAllLikes",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
           "request": {
             "method": "GET",
-            "header": [],
+            "header": [
+              {
+                "key": "x-auth-token",
+                "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NjU3MGYxNTlhMzYzYmI5MTRhOGE0MjkiLCJpYXQiOjE3MTY5ODIxMzUsImV4cCI6MTc0ODUxODEzNX0.K65LXVA1z08wNHkVqYr1QoMYA9MoNglri4e2PDrw_OQ"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"liked_user_id\": \"6656f56aa6416349d08dc094\",\r\n  \"liked_at\": \"2024-05-29T12:00:00Z\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
             "url": {
-              "raw": "/api/likes",
+              "raw": "http://localhost:3000/api/likes",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
               "path": ["api", "likes"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GetAllLikeById",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-auth-token",
+                "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NjU3MGYxNTlhMzYzYmI5MTRhOGE0MjkiLCJpYXQiOjE3MTY5ODIxMzUsImV4cCI6MTc0ODUxODEzNX0.K65LXVA1z08wNHkVqYr1QoMYA9MoNglri4e2PDrw_OQ"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"liked_user_id\": \"6656f56aa6416349d08dc094\",\r\n  \"liked_at\": \"2024-05-29T12:00:00Z\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3000/api/likes/665711ff60214855487c2873",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "likes", "665711ff60214855487c2873"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "DeleteLikeById",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "x-auth-token",
+                "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NjU3MGYxNTlhMzYzYmI5MTRhOGE0MjkiLCJpYXQiOjE3MTY5ODIxMzUsImV4cCI6MTc0ODUxODEzNX0.K65LXVA1z08wNHkVqYr1QoMYA9MoNglri4e2PDrw_OQ"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"liked_user_id\": \"6656f56aa6416349d08dc094\",\r\n  \"liked_at\": \"2024-05-29T12:00:00Z\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3000/api/likes/665711ff60214855487c2873",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "likes", "665711ff60214855487c2873"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "UpdateLikeById",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "x-auth-token",
+                "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NjU3MGYxNTlhMzYzYmI5MTRhOGE0MjkiLCJpYXQiOjE3MTY5ODIxMzUsImV4cCI6MTc0ODUxODEzNX0.K65LXVA1z08wNHkVqYr1QoMYA9MoNglri4e2PDrw_OQ"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"liked_user_id\": \"6656f56aa6416349d08dc094\",\r\n  \"liked_at\": \"2024-05-29T12:00:00Z\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3000/api/likes/665711ff60214855487c2873",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "likes", "665711ff60214855487c2873"]
             }
           },
           "response": []
@@ -526,7 +666,7 @@
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\r\n    \"ph_number\":\"+971553962773\",\r\n    \"otp\":\"399147\"\r\n}",
+                  "raw": "{\r\n    \"ph_number\":\"+971553962773\",\r\n    \"otp\":\"847312\"\r\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -550,7 +690,7 @@
                 "header": [
                   {
                     "key": "x-auth-token",
-                    "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NjU2YzNiZGNiMmQ0NWY2YThmMDdkMmQiLCJpYXQiOjE3MTY5NjIyMzgsImV4cCI6MTc0ODQ5ODIzOH0.mqW3Mi101DU2P0kXX-O9sEQc-yhyCnVjyN3R81l2z64"
+                    "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NjU2ZjU2YWE2NDE2MzQ5ZDA4ZGMwOTQiLCJpYXQiOjE3MTY5NzQ5NTUsImV4cCI6MTc0ODUxMDk1NX0.PWaqFjHzvp5w6rachbd0jO-RJgPSb3VIIhRTCEVbuJg"
                   }
                 ],
                 "body": {
@@ -612,7 +752,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n    \"usernameOrEmail\":\"alikhan@gmail.com\",\r\n    \"password\":\"abc@123\"\r\n}",
+              "raw": "{\r\n    \"usernameOrEmail\":\"john.doe@example.com\",\r\n    \"password\":\"password123\"\r\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -630,6 +770,30 @@
           "response": []
         },
         {
+          "name": "forgot-password",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"ph_number\":\"+971553962773\",\r\n    \"password\":\"abc@123\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3000/api/auth/forgot-password",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "auth", "forgot-password"]
+            }
+          },
+          "response": []
+        },
+        {
           "name": "logout",
           "request": {
             "method": "GET",
@@ -637,18 +801,6 @@
             "url": {
               "raw": "/api/auth/logout",
               "path": ["api", "auth", "logout"]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "forgot-password",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "/api/auth/forgot-password",
-              "path": ["api", "auth", "forgot-password"]
             }
           },
           "response": []
