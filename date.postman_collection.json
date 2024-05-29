@@ -1,0 +1,968 @@
+{
+  "info": {
+    "_postman_id": "c52142b3-c3a3-4270-8d9c-fbceb7cc16a3",
+    "name": "Dating App API Copy",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "34981297"
+  },
+  "item": [
+    {
+      "name": "Users-Management",
+      "item": [
+        {
+          "name": "GET All Users",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/api/users",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "users"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET User by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/api/users/665580fc8058b8cfc1049979",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "users", "665580fc8058b8cfc1049979"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "profile",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-auth-token",
+                "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NjU1ODBmYzgwNThiOGNmYzEwNDk5NzkiLCJpYXQiOjE3MTY4ODYzNTYsImV4cCI6MTc0ODQyMjM1Nn0.WdrtC4WDPxOtlmKrirCWwhcnCpu8CdbcOkMXbKS3DD4"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/api/users/profile",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "users", "profile"],
+              "query": [
+                {
+                  "key": "",
+                  "value": "",
+                  "disabled": true
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "POST Create User",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"email\": \"john.doe@example.com\",\r\n  \"password\": \"password123\",\r\n  \"contact\":\"+923135664154\",\r\n  \"first_name\": \"John\",\r\n  \"last_name\": \"Doe\",\r\n  \"date_of_birth\": \"1990-01-01\",\r\n  \"gender\": \"Male\",\r\n  \"sexual_orientation\": \"Straight\",\r\n  \"bio\": \"Lorem ipsum dolor sit amet, consectetur adipiscing elit.\",\r\n  \"profile_picture\": \"https://example.com/profile.jpg\",\r\n  \"interests\": [\"Hiking\", \"Reading\", \"Traveling\"],\r\n  \"location\": {\r\n    \"city\": \"New York\",\r\n    \"state\": \"NY\",\r\n    \"country\": \"USA\",\r\n     \"latitude\":0,\r\n    \"longitude\":0\r\n  },\r\n  \"occupation\": \"Software Engineer\",\r\n  \"education\": \"Bachelor's Degree\",\r\n  \"height\": 180,\r\n  \"weight\": 75,\r\n  \"hobbies\": [\"Photography\", \"Cooking\", \"Gardening\"],\r\n  \"preferences\": {\r\n    \"preferred_age_range\": [25, 35],\r\n    \"preferred_gender\": \"Female\",\r\n    \"preferred_distance\": 50,\r\n    \"preferred_interests\": [\"Traveling\", \"Reading\"]\r\n  }\r\n}\r\n",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3000/api/users",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "users"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "User Photos",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"username\": \"john_doe123\",\r\n  \"email\": \"john.doe@example.com\",\r\n  \"password\": \"password123\",\r\n  \"first_name\": \"John\",\r\n  \"last_name\": \"Doe\",\r\n  \"date_of_birth\": \"1990-01-01\",\r\n  \"gender\": \"Male\",\r\n  \"sexual_orientation\": \"Straight\",\r\n  \"bio\": \"Lorem ipsum dolor sit amet, consectetur adipiscing elit.\",\r\n  \"profile_picture\": \"https://example.com/profile.jpg\",\r\n  \"interests\": [\"Hiking\", \"Reading\", \"Traveling\"],\r\n  \"location\": {\r\n    \"city\": \"New York\",\r\n    \"state\": \"NY\",\r\n    \"country\": \"USA\"\r\n  },\r\n  \"occupation\": \"Software Engineer\",\r\n  \"education\": \"Bachelor's Degree\",\r\n  \"height\": 180,\r\n  \"weight\": 75,\r\n  \"hobbies\": [\"Photography\", \"Cooking\", \"Gardening\"],\r\n  \"preferences\": {\r\n    \"preferred_age_range\": [25, 35],\r\n    \"preferred_gender\": \"Female\",\r\n    \"preferred_distance\": 50,\r\n    \"preferred_interests\": [\"Traveling\", \"Reading\"]\r\n  }\r\n}\r\n",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3000/api/users/:id/photos",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "users", ":id", "photos"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": ""
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "UserMatches",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"username\": \"john_doe123\",\r\n  \"email\": \"john.doe@example.com\",\r\n  \"password\": \"password123\",\r\n  \"first_name\": \"John\",\r\n  \"last_name\": \"Doe\",\r\n  \"date_of_birth\": \"1990-01-01\",\r\n  \"gender\": \"Male\",\r\n  \"sexual_orientation\": \"Straight\",\r\n  \"bio\": \"Lorem ipsum dolor sit amet, consectetur adipiscing elit.\",\r\n  \"profile_picture\": \"https://example.com/profile.jpg\",\r\n  \"interests\": [\"Hiking\", \"Reading\", \"Traveling\"],\r\n  \"location\": {\r\n    \"city\": \"New York\",\r\n    \"state\": \"NY\",\r\n    \"country\": \"USA\"\r\n  },\r\n  \"occupation\": \"Software Engineer\",\r\n  \"education\": \"Bachelor's Degree\",\r\n  \"height\": 180,\r\n  \"weight\": 75,\r\n  \"hobbies\": [\"Photography\", \"Cooking\", \"Gardening\"],\r\n  \"preferences\": {\r\n    \"preferred_age_range\": [25, 35],\r\n    \"preferred_gender\": \"Female\",\r\n    \"preferred_distance\": 50,\r\n    \"preferred_interests\": [\"Traveling\", \"Reading\"]\r\n  }\r\n}\r\n",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "/api/users/:id/matches",
+              "path": ["api", "users", ":id", "matches"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": ""
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "PUT Update User",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"name\": \"Jane Doe\", \"email\": \"jane.doe@example.com\" }"
+            },
+            "url": {
+              "raw": "http://localhost:3000/api/users/1",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "users", "1"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "DELETE Delete User",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/api/users/1",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "users", "1"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Match Making",
+      "item": [
+        {
+          "name": "Matches",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "/api/matches",
+              "path": ["api", "matches"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Like",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/api/users/1",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "users", "1"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Dislike",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"username\": \"john_doe123\",\r\n  \"email\": \"john.doe@example.com\",\r\n  \"password\": \"password123\",\r\n  \"first_name\": \"John\",\r\n  \"last_name\": \"Doe\",\r\n  \"date_of_birth\": \"1990-01-01\",\r\n  \"gender\": \"Male\",\r\n  \"sexual_orientation\": \"Straight\",\r\n  \"bio\": \"Lorem ipsum dolor sit amet, consectetur adipiscing elit.\",\r\n  \"profile_picture\": \"https://example.com/profile.jpg\",\r\n  \"interests\": [\"Hiking\", \"Reading\", \"Traveling\"],\r\n  \"location\": {\r\n    \"city\": \"New York\",\r\n    \"state\": \"NY\",\r\n    \"country\": \"USA\"\r\n  },\r\n  \"occupation\": \"Software Engineer\",\r\n  \"education\": \"Bachelor's Degree\",\r\n  \"height\": 180,\r\n  \"weight\": 75,\r\n  \"hobbies\": [\"Photography\", \"Cooking\", \"Gardening\"],\r\n  \"preferences\": {\r\n    \"preferred_age_range\": [25, 35],\r\n    \"preferred_gender\": \"Female\",\r\n    \"preferred_distance\": 50,\r\n    \"preferred_interests\": [\"Traveling\", \"Reading\"]\r\n  }\r\n}\r\n",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3000/api/users",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "users"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Block",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"username\": \"john_doe123\",\r\n  \"email\": \"john.doe@example.com\",\r\n  \"password\": \"password123\",\r\n  \"first_name\": \"John\",\r\n  \"last_name\": \"Doe\",\r\n  \"date_of_birth\": \"1990-01-01\",\r\n  \"gender\": \"Male\",\r\n  \"sexual_orientation\": \"Straight\",\r\n  \"bio\": \"Lorem ipsum dolor sit amet, consectetur adipiscing elit.\",\r\n  \"profile_picture\": \"https://example.com/profile.jpg\",\r\n  \"interests\": [\"Hiking\", \"Reading\", \"Traveling\"],\r\n  \"location\": {\r\n    \"city\": \"New York\",\r\n    \"state\": \"NY\",\r\n    \"country\": \"USA\"\r\n  },\r\n  \"occupation\": \"Software Engineer\",\r\n  \"education\": \"Bachelor's Degree\",\r\n  \"height\": 180,\r\n  \"weight\": 75,\r\n  \"hobbies\": [\"Photography\", \"Cooking\", \"Gardening\"],\r\n  \"preferences\": {\r\n    \"preferred_age_range\": [25, 35],\r\n    \"preferred_gender\": \"Female\",\r\n    \"preferred_distance\": 50,\r\n    \"preferred_interests\": [\"Traveling\", \"Reading\"]\r\n  }\r\n}\r\n",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3000/api/users/:id/photos",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "users", ":id", "photos"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": ""
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Message EndPoints",
+      "item": [
+        {
+          "name": "Messages",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "/api/messages",
+              "path": ["api", "messages"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Send",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "/api/messages/send",
+              "path": ["api", "messages", "send"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"username\": \"john_doe123\",\r\n  \"email\": \"john.doe@example.com\",\r\n  \"password\": \"password123\",\r\n  \"first_name\": \"John\",\r\n  \"last_name\": \"Doe\",\r\n  \"date_of_birth\": \"1990-01-01\",\r\n  \"gender\": \"Male\",\r\n  \"sexual_orientation\": \"Straight\",\r\n  \"bio\": \"Lorem ipsum dolor sit amet, consectetur adipiscing elit.\",\r\n  \"profile_picture\": \"https://example.com/profile.jpg\",\r\n  \"interests\": [\"Hiking\", \"Reading\", \"Traveling\"],\r\n  \"location\": {\r\n    \"city\": \"New York\",\r\n    \"state\": \"NY\",\r\n    \"country\": \"USA\"\r\n  },\r\n  \"occupation\": \"Software Engineer\",\r\n  \"education\": \"Bachelor's Degree\",\r\n  \"height\": 180,\r\n  \"weight\": 75,\r\n  \"hobbies\": [\"Photography\", \"Cooking\", \"Gardening\"],\r\n  \"preferences\": {\r\n    \"preferred_age_range\": [25, 35],\r\n    \"preferred_gender\": \"Female\",\r\n    \"preferred_distance\": 50,\r\n    \"preferred_interests\": [\"Traveling\", \"Reading\"]\r\n  }\r\n}\r\n",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "/api/messages/:id/delete",
+              "path": ["api", "messages", ":id", "delete"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": ""
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Likes",
+      "item": [
+        {
+          "name": "likes",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "/api/likes",
+              "path": ["api", "likes"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "unlike",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "/api/likes/:id/unlike",
+              "path": ["api", "likes", ":id", "unlike"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": ""
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Blocks",
+      "item": [
+        {
+          "name": "blocks",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "/api/blocks",
+              "path": ["api", "blocks"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "un-block",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "/api/blocks/:id/unblock",
+              "path": ["api", "blocks", ":id", "unblock"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": ""
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Subscriptions",
+      "item": [
+        {
+          "name": "subscriptions",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "/api/subscriptions",
+              "path": ["api", "subscriptions"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "upgrade",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "/api/subscriptions/upgrade",
+              "path": ["api", "subscriptions", "upgrade"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "cancel",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "/api/subscriptions/cancel",
+              "path": ["api", "subscriptions", "cancel"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Signup Flow",
+          "item": [
+            {
+              "name": "signup step0 Number",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n    \"ph_number\":\"+971553962773\"\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "http://localhost:3000/api/auth/signup-step-zero",
+                  "protocol": "http",
+                  "host": ["localhost"],
+                  "port": "3000",
+                  "path": ["api", "auth", "signup-step-zero"]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "signup step0 Email",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n    \"email\":\"ali12@gmail.com\"\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "http://localhost:3000/api/auth/signup-step-zero",
+                  "protocol": "http",
+                  "host": ["localhost"],
+                  "port": "3000",
+                  "path": ["api", "auth", "signup-step-zero"]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "send-otp",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n    \"ph_number\":\"+971553962773\"\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "http://localhost:3000/api/auth/send-otp",
+                  "protocol": "http",
+                  "host": ["localhost"],
+                  "port": "3000",
+                  "path": ["api", "auth", "send-otp"]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "verify-otp",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "x-auth-token",
+                    "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NjU2YzNiZGNiMmQ0NWY2YThmMDdkMmQiLCJpYXQiOjE3MTY5NjIyMzgsImV4cCI6MTc0ODQ5ODIzOH0.mqW3Mi101DU2P0kXX-O9sEQc-yhyCnVjyN3R81l2z64"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n    \"ph_number\":\"+971553962773\",\r\n    \"otp\":\"399147\"\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "http://localhost:3000/api/auth/verify-otp",
+                  "protocol": "http",
+                  "host": ["localhost"],
+                  "port": "3000",
+                  "path": ["api", "auth", "verify-otp"]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "add-user-signup-details",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "x-auth-token",
+                    "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NjU2YzNiZGNiMmQ0NWY2YThmMDdkMmQiLCJpYXQiOjE3MTY5NjIyMzgsImV4cCI6MTc0ODQ5ODIzOH0.mqW3Mi101DU2P0kXX-O9sEQc-yhyCnVjyN3R81l2z64"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n  \"email\": \"john23.doe@example.com\",\r\n  \"first_name\": \"John\",\r\n  \"last_name\": \"Doe\",\r\n  \"date_of_birth\": \"1990-01-01\",\r\n  \"gender\": \"Male\",\r\n  \"sexual_orientation\": \"Straight\",\r\n  \"bio\": \"Lorem ipsum dolor sit amet, consectetur adipiscing elit.\",\r\n  \"profile_picture\": \"https://example.com/profile.jpg\",\r\n  \"interests\": [\"Hiking\", \"Reading\", \"Traveling\"],\r\n  \"location\": {\r\n    \"city\": \"New York\",\r\n    \"state\": \"NY\",\r\n    \"country\": \"USA\",\r\n    \"latitude\":0,\r\n    \"longitude\":0\r\n  },\r\n  \"occupation\": \"Software Engineer\",\r\n  \"education\": \"Bachelor's Degree\",\r\n  \"height\": 180,\r\n  \"weight\": 75,\r\n  \"hobbies\": [\"Photography\", \"Cooking\", \"Gardening\"],\r\n  \"preferences\": {\r\n    \"preferred_age_range\": [25, 35],\r\n    \"preferred_gender\": \"Female\",\r\n    \"preferred_distance\": 50,\r\n    \"preferred_interests\": [\"Traveling\", \"Reading\"]\r\n  }\r\n}\r\n",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "http://localhost:3000/api/auth/add-user-details",
+                  "protocol": "http",
+                  "host": ["localhost"],
+                  "port": "3000",
+                  "path": ["api", "auth", "add-user-details"],
+                  "query": [
+                    {
+                      "key": null,
+                      "value": "",
+                      "disabled": true
+                    }
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "register",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"username\":\"alikhan12\",\r\n    \"email\":\"alikhan@gmail.com\",\r\n    \"password\":\"abc@123\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3000/api/auth/register",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "auth", "register"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "login",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"usernameOrEmail\":\"alikhan@gmail.com\",\r\n    \"password\":\"abc@123\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3000/api/auth/login",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "auth", "login"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "logout",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "/api/auth/logout",
+              "path": ["api", "auth", "logout"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "forgot-password",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "/api/auth/forgot-password",
+              "path": ["api", "auth", "forgot-password"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "reset-password",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "/api/auth/reset-password",
+              "path": ["api", "auth", "reset-password"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Reports",
+      "item": [
+        {
+          "name": "report-send",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "/api/reports/send",
+              "path": ["api", "reports", "send"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "report-review",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "/api/reports/:id/review",
+              "path": ["api", "reports", ":id", "review"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": ""
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Hobbies",
+      "item": [
+        {
+          "name": "Hobies",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"text\": \"What are your hobbies?\",\r\n  \"options\": [\r\n    { \"text\": \"Harry Potter\", \"selected\": false },\r\n    { \"text\": \"90s Kid\", \"selected\": false },\r\n    { \"text\": \"SoundCloud\", \"selected\": false },\r\n    { \"text\": \"Spa\", \"selected\": false },\r\n    { \"text\": \"Self Care\", \"selected\": false },\r\n    { \"text\": \"Heavy Metal\", \"selected\": false },\r\n    { \"text\": \"House Parties\", \"selected\": false },\r\n    { \"text\": \"Gin tonic\", \"selected\": false },\r\n    { \"text\": \"Gymnastics\", \"selected\": false },\r\n    { \"text\": \"Hot Yoga\", \"selected\": false },\r\n    { \"text\": \"Meditation\", \"selected\": false },\r\n    { \"text\": \"Spotify\", \"selected\": false },\r\n    { \"text\": \"Sushi\", \"selected\": false },\r\n    { \"text\": \"Hockey\", \"selected\": false },\r\n    { \"text\": \"Basketball\", \"selected\": false },\r\n    { \"text\": \"Slam Poetry\", \"selected\": false },\r\n    { \"text\": \"Home Workout\", \"selected\": false },\r\n    { \"text\": \"Theater\", \"selected\": false },\r\n    { \"text\": \"Cafe hopping\", \"selected\": false },\r\n    { \"text\": \"Aquarium\", \"selected\": false },\r\n    { \"text\": \"Sneakers\", \"selected\": false },\r\n    { \"text\": \"Instagram\", \"selected\": false },\r\n    { \"text\": \"Hot Springs\", \"selected\": false },\r\n    { \"text\": \"Walking\", \"selected\": false },\r\n    { \"text\": \"Running\", \"selected\": false },\r\n    { \"text\": \"Travel\", \"selected\": false },\r\n    { \"text\": \"Language Exchange\", \"selected\": false },\r\n    { \"text\": \"Movies\", \"selected\": false },\r\n    { \"text\": \"Guitarists\", \"selected\": false },\r\n    { \"text\": \"Social Development\", \"selected\": false },\r\n    { \"text\": \"Gym\", \"selected\": false },\r\n    { \"text\": \"Social Media\", \"selected\": false },\r\n    { \"text\": \"Hip Hop\", \"selected\": false },\r\n    { \"text\": \"Skincare\", \"selected\": false },\r\n    { \"text\": \"J-Pop\", \"selected\": false },\r\n    { \"text\": \"Shisha\", \"selected\": false },\r\n    { \"text\": \"Cricket\", \"selected\": false },\r\n    { \"text\": \"Freelance\", \"selected\": false },\r\n    { \"text\": \"Skateboarding\", \"selected\": false },\r\n    { \"text\": \"Gospel\", \"selected\": false },\r\n    { \"text\": \"K-Pop\", \"selected\": false },\r\n    { \"text\": \"Potterhead\", \"selected\": false },\r\n    { \"text\": \"Trying New Things\", \"selected\": false },\r\n    { \"text\": \"Photography\", \"selected\": false },\r\n    { \"text\": \"Bollywood\", \"selected\": false },\r\n    { \"text\": \"Reading\", \"selected\": false },\r\n    { \"text\": \"Singing\", \"selected\": false },\r\n    { \"text\": \"Sports\", \"selected\": false },\r\n    { \"text\": \"Poetry\", \"selected\": false },\r\n    { \"text\": \"Stand up Comedy\", \"selected\": false },\r\n    { \"text\": \"Coffee\", \"selected\": false },\r\n    { \"text\": \"Karaoke\", \"selected\": false },\r\n    { \"text\": \"Fortnite\", \"selected\": false },\r\n    { \"text\": \"Free Diving\", \"selected\": false },\r\n    { \"text\": \"Self Development\", \"selected\": false }\r\n  ]\r\n}\r\n",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3000/api/hobbies",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "hobbies"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GetAllHobies",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3000/api/hobbies",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "hobbies"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "UpDateHobies",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"text\": \"What are your hobbies?\",\r\n  \"options\": [\r\n    { \"text\": \"Harry Potter\", \"selected\": false },\r\n    { \"text\": \"90s Kid\", \"selected\": false },\r\n    { \"text\": \"SoundCloud\", \"selected\": false },\r\n    { \"text\": \"Spa\", \"selected\": false },\r\n    { \"text\": \"Self Care\", \"selected\": false },\r\n    { \"text\": \"Heavy Metal\", \"selected\": false },\r\n    { \"text\": \"House Parties\", \"selected\": false },\r\n    { \"text\": \"Gin tonic\", \"selected\": false },\r\n    { \"text\": \"Gymnastics\", \"selected\": false },\r\n    { \"text\": \"Hot Yoga\", \"selected\": false },\r\n    { \"text\": \"Meditation\", \"selected\": false },\r\n    { \"text\": \"Spotify\", \"selected\": false },\r\n    { \"text\": \"Sushi\", \"selected\": false },\r\n    { \"text\": \"Hockey\", \"selected\": false },\r\n    { \"text\": \"Basketball\", \"selected\": false },\r\n    { \"text\": \"Slam Poetry\", \"selected\": false },\r\n    { \"text\": \"Home Workout\", \"selected\": false },\r\n    { \"text\": \"Theater\", \"selected\": false },\r\n    { \"text\": \"Cafe hopping\", \"selected\": false },\r\n    { \"text\": \"Aquarium\", \"selected\": false },\r\n    { \"text\": \"Sneakers\", \"selected\": false },\r\n    { \"text\": \"Instagram\", \"selected\": false },\r\n    { \"text\": \"Hot Springs\", \"selected\": false },\r\n    { \"text\": \"Walking\", \"selected\": false },\r\n    { \"text\": \"Running\", \"selected\": false },\r\n    { \"text\": \"Travel\", \"selected\": false },\r\n    { \"text\": \"Language Exchange\", \"selected\": false },\r\n    { \"text\": \"Movies\", \"selected\": false },\r\n    { \"text\": \"Guitarists\", \"selected\": false },\r\n    { \"text\": \"Social Development\", \"selected\": false },\r\n    { \"text\": \"Gym\", \"selected\": false },\r\n    { \"text\": \"Social Media\", \"selected\": false },\r\n    { \"text\": \"Hip Hop\", \"selected\": false },\r\n    { \"text\": \"Skincare\", \"selected\": false },\r\n    { \"text\": \"J-Pop\", \"selected\": false },\r\n    { \"text\": \"Shisha\", \"selected\": false },\r\n    { \"text\": \"Cricket\", \"selected\": false },\r\n    { \"text\": \"Freelance\", \"selected\": false },\r\n    { \"text\": \"Skateboarding\", \"selected\": false },\r\n    { \"text\": \"Gospel\", \"selected\": false },\r\n    { \"text\": \"K-Pop\", \"selected\": false },\r\n    { \"text\": \"Potterhead\", \"selected\": false },\r\n    { \"text\": \"Trying New Things\", \"selected\": false },\r\n    { \"text\": \"Photography\", \"selected\": false },\r\n    { \"text\": \"Bollywood\", \"selected\": false },\r\n    { \"text\": \"Reading\", \"selected\": false },\r\n    { \"text\": \"Singing\", \"selected\": false },\r\n    { \"text\": \"Sports\", \"selected\": false },\r\n    { \"text\": \"Poetry\", \"selected\": false },\r\n    { \"text\": \"Stand up Comedy\", \"selected\": false },\r\n    { \"text\": \"Coffee\", \"selected\": false },\r\n    { \"text\": \"Karaoke\", \"selected\": false },\r\n    { \"text\": \"Fortnite\", \"selected\": false },\r\n    { \"text\": \"Free Diving\", \"selected\": false },\r\n    { \"text\": \"Self Development\", \"selected\": false }\r\n  ]\r\n}\r\n",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3000/api/hobbies/6656e0e966bfdf65e0303e08",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "hobbies", "6656e0e966bfdf65e0303e08"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GetHobbyById",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3000/api/hobbies/6656e0e966bfdf65e0303e08",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "hobbies", "6656e0e966bfdf65e0303e08"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GetHobbyById Copy",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3000/api/hobbies/6656e0e966bfdf65e0303e08",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "hobbies", "6656e0e966bfdf65e0303e08"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Questions",
+      "item": [
+        {
+          "name": "Questions",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"text\": \"What is your Intrest?\",\r\n  \"options\": [\r\n    { \"text\": \"Harry Potter\", \"selected\": false },\r\n    { \"text\": \"90s Kid\", \"selected\": false },\r\n    { \"text\": \"SoundCloud\", \"selected\": false }\r\n  ]\r\n}\r\n",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3000/api/question",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "question"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GetAllQuestions",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3000/api/question",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "question"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "UpDateQuestions",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"text\": \"What are your sdfsd?\",\r\n  \"options\": [\r\n    { \"text\": \"Harry Potter\", \"selected\": false }\r\n\r\n  ]\r\n}\r\n",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3000/api/question/6656e2d98930093d959139be",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "question", "6656e2d98930093d959139be"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GetQuestionsById",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3000/api/question/6656e2d98930093d959139be",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "question", "6656e2d98930093d959139be"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GetQuestionById",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3000/api/question/6656e2d98930093d959139be",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "question", "6656e2d98930093d959139be"]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
