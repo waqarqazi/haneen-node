@@ -169,19 +169,20 @@ const forgotPassword = async (req, res) => {
 const login = async (req, res) => {
   try {
     const user = await User.findOne({
-      $or: [
-        { username: req.body.usernameOrEmail },
-        { email: req.body.usernameOrEmail },
-      ],
+      ph_number: req.body.ph_number,
     }).select('+password');
 
     if (!user)
-      return res.status(400).json({ error: 'Invalid userName or Password' });
+      return res
+        .status(400)
+        .json({ error: 'Invalid Phone Number or Password' });
 
     const validatePassword = bcrypt.compare(req.body.password, user.password);
 
     if (!validatePassword)
-      return res.status(400).json({ error: 'Invalid userName or Password' });
+      return res
+        .status(400)
+        .json({ error: 'Invalid Phone Number or Password' });
 
     // User disabled
     // if (!user.status)

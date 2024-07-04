@@ -4,7 +4,7 @@ const yup = require('yup');
 
 const validateLogin = yup.object({
   body: yup.object({
-    usernameOrEmail: yup.string().required(),
+    ph_number: yup.string().required(),
     password: yup.string().required(),
   }),
 });
