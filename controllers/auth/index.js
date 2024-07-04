@@ -7,6 +7,7 @@ const User = require('../../models/User.js');
 const ErrorResponse = require('../../utils/errorResponse.js');
 const { generateUniqueUsername } = require('../../utils/helpers.js');
 const { sendOTP, verifyOTP, generateOtp } = require('./helper.js');
+const InvalidToken = require('../../models/InvalidToken.js');
 // Register User
 const register = async (req, res) => {
   const { username, email, password } = req.body;
@@ -165,6 +166,7 @@ const forgotPassword = async (req, res) => {
     return res.status(500).send(error);
   }
 };
+
 // Login User
 const login = async (req, res) => {
   try {
@@ -195,11 +197,57 @@ const login = async (req, res) => {
     return res.status(200).json({
       success: true,
       token,
-      user: sanitizedUser,
+      data: sanitizedUser,
     });
   } catch (error) {
     console.log('error', error);
     return res.status(500).json({ status: false, error });
+  }
+};
+
+// checkUserExists
+const checkUserExists = async (req, res) => {
+  try {
+    const user = await User.findOne({
+      ph_number: req.body.ph_number,
+    }).select('+password');
+
+    if (!user)
+      return res.status(404).json({
+        success: false,
+        status: 'user not exist',
+      });
+
+    return res.status(200).json({
+      success: true,
+      status: 'user exist',
+    });
+  } catch (error) {
+    console.log('error', error);
+    return res.status(500).json({ status: false, error });
+  }
+};
+
+// Logout User
+const logout = async (req, res) => {
+  try {
+    const token = req.header('x-auth-token');
+    if (!token) {
+      return res.status(401).json({ message: 'No token provided' });
+    }
+
+    // Add the token to the invalidated tokens list
+    const invalidToken = new InvalidToken({ token });
+    await invalidToken.save();
+
+    return res
+      .status(200)
+      .json({ success: true, message: 'Logout successful' });
+  } catch (error) {
+    console.log('error', error);
+    return res
+      .status(500)
+      .json({ status: false, message: 'Internal server error', error });
   }
 };
 
@@ -211,4 +259,6 @@ module.exports = {
   verifyOtpApi,
   addRemainDetails,
   forgotPassword,
+  logout,
+  checkUserExists,
 };

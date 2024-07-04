@@ -8,6 +8,11 @@ const validateLogin = yup.object({
     password: yup.string().required(),
   }),
 });
+const validateUserExist = yup.object({
+  body: yup.object({
+    ph_number: yup.string().required(),
+  }),
+});
 const validateRegister = yup.object().shape({
   body: yup.object({
     username: yup.string().required(),
@@ -41,4 +46,5 @@ const validateUpdateUserById = yup.object({
 module.exports = {
   validateLogin,
   validateRegister,
+  validateUserExist,
 };
