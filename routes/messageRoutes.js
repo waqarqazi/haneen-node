@@ -1,20 +1,16 @@
 const express = require('express');
+const {
+  getChatList,
+  sendMessage,
+  getMessages,
+  addMessage,
+} = require('../controllers/chatController.js');
+
 const router = express.Router();
-const messageController = require('../controllers/messageController.js');
 
-// Get all messages
-router.get('/', messageController.getAllMessages);
-
-// Get message by ID
-router.get('/:id', messageController.getMessageById);
-
-// Create a new message
-router.post('/', messageController.createMessage);
-
-// Update a message
-router.put('/:id', messageController.updateMessage);
-
-// Delete a message
-router.delete('/:id', messageController.deleteMessage);
+router.get('/chatlist/:userId', getChatList);
+router.post('/send-message', sendMessage);
+router.get('/messages/:userId1/:userId2', getMessages);
+router.post('/', addMessage);
 
 module.exports = router;

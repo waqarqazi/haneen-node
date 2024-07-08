@@ -1,57 +1,41 @@
 require('dotenv').config();
 const express = require('express');
-const mongoose = require('mongoose');
-// const bodyParser = require('body-parser');
-const app = express();
 const cors = require('cors');
-const errorHandler = require('./middleware/errorMiddleware'); // Import directly as errorHandler
-const routes = require('./routes'); // Import your routes
+const http = require('http');
+const socketio = require('socket.io');
+const routes = require('./routes');
 
-// Set strictQuery to false to prepare for Mongoose 7
-mongoose.set('strictQuery', false);
-
+const app = express();
+// const initializeFirebase = require('./config/firebase');
+// const sendNotification = require('./utils/notifications');
+// this is comment for testing husky
 app.use(
   cors({
     origin: true,
   }),
 );
 app.use(express.json({ limit: '50mb' }));
-// Middleware
-// app.use(bodyParser.json());
-// app.use(bodyParser.urlencoded({ extended: false }));
+app.use('/api', routes);
+// initializeFirebase();
 
-// Use routes
-app.use('/api', routes); // Ensure routes is correctly imported and used
+// require('./startup/logging');
+// require('./startup/route')(app);
+require('./startup/db')();
 
-// Error handling middleware
-app.use(errorHandler); // Use the errorHandler middleware
+const port = process.env.NODE_ENV ? 8080 : 3000;
+const server = http.createServer(app);
+const io = socketio(server);
 
-// Start the server
-const PORT = process.env.PORT || 5000;
-
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).send({ message: 'Internal server error' });
-});
-
-app.get('*', (req, res) => {
-  console.log('Status runing');
-  return res.status(200).send('Up & Running');
-});
-
-// Connect to MongoDB
-mongoose
-  .connect(process.env.MONGO_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  })
-  .then(() => {
-    console.log('Connected to DB');
-    app.listen(PORT, () => {
-      console.log(`Server listening on port ${PORT}`);
-    });
-  })
-  .catch(err => {
-    // Pass the error to the errorHandler middleware
-    console.log('err', err);
+io.on('connection', client => {
+  console.log('A user is connected with io ');
+  client.on('disconnect', () => {
+    console.log('user disconnected');
   });
+
+  client.on('sendMessage', messageData => {
+    console.log('messageData', messageData);
+    io.emit('receiveMessage', messageData);
+  });
+});
+
+server.listen(port, () => console.log(`Listning on port ${port}...`));

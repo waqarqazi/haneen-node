@@ -9,19 +9,17 @@ const likeRoutes = require('./likeRoutes.js');
 const blockRoutes = require('./blockRoutes.js');
 const subscriptionRoutes = require('./subscriptionRoutes.js');
 const reportRoutes = require('./reportRoutes.js');
-const chatRoutes = require('./chat/chatRoutes.js');
 const hobbyRoutes = require('./hobbyRoute.js');
 const questionRoutes = require('./questionRoute.js');
 
 router.use('/auth', authRoutes);
 router.use('/users', userRoutes);
 router.use('/matches', matchRoutes);
-router.use('/messages', messageRoutes);
 router.use('/likes', likeRoutes);
 router.use('/blocks', blockRoutes);
 router.use('/subscriptions', subscriptionRoutes);
 router.use('/reports', reportRoutes);
-router.use('/chat', chatRoutes);
+router.use('/messages', messageRoutes);
 router.use('/hobbies', hobbyRoutes);
 router.use('/question', questionRoutes);
 router.use('*', (req, res) =>
