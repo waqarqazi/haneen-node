@@ -4,8 +4,13 @@ const yup = require('yup');
 
 const validateLogin = yup.object({
   body: yup.object({
-    usernameOrEmail: yup.string().required(),
+    ph_number: yup.string().required(),
     password: yup.string().required(),
+  }),
+});
+const validateUserExist = yup.object({
+  body: yup.object({
+    ph_number: yup.string().required(),
   }),
 });
 const validateRegister = yup.object().shape({
@@ -41,4 +46,5 @@ const validateUpdateUserById = yup.object({
 module.exports = {
   validateLogin,
   validateRegister,
+  validateUserExist,
 };

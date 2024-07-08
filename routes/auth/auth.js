@@ -6,6 +6,7 @@ const authController = require('../../controllers/auth');
 const {
   validateLogin,
   validateRegister,
+  validateUserExist,
 } = require('../../utils/validation.js');
 const validator = require('../../middleware/validator.js');
 // @route    POST api/auth/register
@@ -17,6 +18,10 @@ router.route('/send-otp').post(authController.sendOtpApi);
 router.route('/verify-otp').post(auth, authController.verifyOtpApi);
 router.route('/add-user-details').post(auth, authController.addRemainDetails);
 router.route('/forgot-password').post(authController.forgotPassword);
+router.route('/logout').post(auth, authController.logout);
+router
+  .route('/user-status')
+  .post(validator(validateUserExist, 'body'), authController.checkUserExists);
 
 // @route    POST api/auth/login
 // @desc     Login user
