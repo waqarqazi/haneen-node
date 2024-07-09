@@ -2,11 +2,11 @@ const mongoose = require('mongoose');
 
 const messageSchema = new mongoose.Schema(
   {
-    match_id: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Match',
-      required: true,
-    },
+    // like_id: {
+    //   type: mongoose.Schema.Types.ObjectId,
+    //   ref: 'Like',
+    //   required: true,
+    // },
     sender: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',

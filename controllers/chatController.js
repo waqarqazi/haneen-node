@@ -1,84 +1,47 @@
-/* eslint-disable camelcase */
-const User = require('../models/User');
+const Room = require('../models/Room');
 const Message = require('../models/Message');
+const Chat = require('../models/Chat');
 
-const addMessage = async (req, res) => {
+const createChat = async (req, res) => {
   try {
-    const { sender, receiver, message, match_id } = req.body;
-    const newMessage = new Message({
-      sender,
-      receiver,
-      message,
-      match_id,
-      lastMessage: {
-        content: message,
-        createdAt: Date.now(),
-      },
-    });
+    const { userIds } = req.body;
+    const chat = new Chat({ users: userIds, messages: [] });
+    await chat.save();
+    res.status(201).send(chat);
+  } catch (err) {
+    res.status(500).send({ error: err.message });
+  }
+};
+const getChatOverview = async (req, res) => {
+  const { userId } = req.params;
 
-    await newMessage.save();
-    res.status(201).json(newMessage);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
+  try {
+    // Find all rooms involving the user
+    const rooms = await Room.find({
+      $or: [{ user1: userId }, { user2: userId }],
+    }).populate('user1 user2', 'username'); // Assuming username is a field in the User model
+
+    // Fetch the latest message for each room
+    const chatOverview = await Promise.all(
+      rooms.map(async room => {
+        const latestMessage = await Message.findOne({ roomId: room.roomId })
+          .sort('-timestamp')
+          .exec();
+
+        return {
+          roomId: room.roomId,
+          user1: room.user1,
+          user2: room.user2,
+          latestMessage,
+        };
+      }),
+    );
+
+    res.json(chatOverview);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Internal server error' });
   }
 };
 
-// Get chat list for a user
-const getChatList = async (req, res) => {
-  try {
-    const userId = req.params.userId;
-    const messages = await Message.find({
-      $or: [{ sender: userId }, { receiver: userId }],
-    })
-      .populate('sender', 'first_name last_name profile_picture username')
-      .sort({ updatedAt: -1 });
-
-    // Flatten the sender fields and remove the sender object
-    const transformedMessages = messages.map(message => {
-      const { sender, ...rest } = message.toObject(); // Destructure to remove sender
-      return {
-        ...rest,
-        firstName: sender.first_name,
-        lastName: sender.last_name,
-        profileImage: sender.profile_picture,
-        sender_username: sender.username,
-      };
-    });
-
-    res.status(200).json(transformedMessages);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
-
-// Send a message
-const sendMessage = async (req, res) => {
-  try {
-    const { sender, receiver, message } = req.body;
-    const newMessage = new Message({ sender, receiver, message });
-
-    await newMessage.save();
-    res.status(200).json(newMessage);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
-
-// Get messages between two users
-const getMessages = async (req, res) => {
-  try {
-    const { userId1, userId2 } = req.params;
-    const messages = await Message.find({
-      $or: [
-        { sender: userId1, receiver: userId2 },
-        { sender: userId2, receiver: userId1 },
-      ],
-    }).sort({ createdAt: 1 });
-
-    res.status(200).json(messages);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
-
-module.exports = { getChatList, sendMessage, getMessages, addMessage };
+module.exports = { createChat, getChatOverview };

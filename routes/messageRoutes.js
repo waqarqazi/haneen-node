@@ -4,13 +4,20 @@ const {
   sendMessage,
   getMessages,
   addMessage,
-} = require('../controllers/chatController.js');
+} = require('../controllers/messageController.js');
+const auth = require('../middleware/authMiddleware.js');
+const { getChatOverview } = require('../controllers/chatController.js');
 
 const router = express.Router();
 
-router.get('/chatlist/:userId', getChatList);
+router.route('/chatlist').get(auth, getChatList);
 router.post('/send-message', sendMessage);
 router.get('/messages/:userId1/:userId2', getMessages);
 router.post('/', addMessage);
+
+// new
+// app.post('/like', likeController.likeUser);
+// app.get('/chatrooms/:userId', chatController.getChatRooms);
+router.get('/chatoverview/:userId', getChatOverview);
 
 module.exports = router;

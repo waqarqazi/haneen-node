@@ -4,6 +4,9 @@ const cors = require('cors');
 const http = require('http');
 const socketio = require('socket.io');
 const routes = require('./routes');
+const User = require('./models/User');
+const Message = require('./models/Message');
+const Like = require('./models/Like');
 
 const app = express();
 // const initializeFirebase = require('./config/firebase');
@@ -14,6 +17,7 @@ app.use(
     origin: true,
   }),
 );
+
 app.use(express.json({ limit: '50mb' }));
 app.use('/api', routes);
 // initializeFirebase();
@@ -22,20 +26,63 @@ app.use('/api', routes);
 // require('./startup/route')(app);
 require('./startup/db')();
 
-const port = process.env.NODE_ENV ? 8080 : 3000;
+const port = process.env.PORT || 3000;
 const server = http.createServer(app);
-const io = socketio(server);
+const io = socketio(server, {
+  cors: {
+    origin: 'http://localhost:3000',
+    methods: ['GET', 'POST'],
+  },
+});
+global.io = io;
 
-io.on('connection', client => {
-  console.log('A user is connected with io ');
-  client.on('disconnect', () => {
-    console.log('user disconnected');
+// Socket.io connection handler
+// Socket.io configuration
+io.on('connection', socket => {
+  console.log('New client connected');
+
+  // Join a chat room
+  socket.on('joinRoom', async ({ roomId }) => {
+    socket.join(roomId);
+    console.log(`User joined room: ${roomId}`);
+
+    // Load chat history for the room
+    Message.find({ roomId })
+      .sort('timestamp')
+      .exec((err, messages) => {
+        if (err) {
+          console.error(err);
+        } else {
+          socket.emit('loadChatHistory', messages);
+        }
+      });
   });
 
-  client.on('sendMessage', messageData => {
-    console.log('messageData', messageData);
-    io.emit('receiveMessage', messageData);
+  // Handle sending a message
+  socket.on(
+    'sendMessage',
+    async ({ roomId, senderId, receiverId, message }) => {
+      try {
+        const newMessage = new Message({
+          sender: senderId,
+          receiver: receiverId,
+          message,
+          roomId,
+          lastMessage: {
+            content: 'test',
+          },
+        });
+        await newMessage.save();
+
+        io.to(roomId).emit('message', newMessage);
+      } catch (err) {
+        console.error(err);
+      }
+    },
+  );
+
+  socket.on('disconnect', () => {
+    console.log('Client disconnected');
   });
 });
-
 server.listen(port, () => console.log(`Listning on port ${port}...`));
