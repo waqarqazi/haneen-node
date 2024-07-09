@@ -47,7 +47,6 @@ const addMessage = async (req, res) => {
 // Get chat list for a user
 const getConversation = async (req, res) => {
   try {
-    const userId = req.body.user._id;
     const roomId = req.params.roomId;
 
     const messages = await Message.find({

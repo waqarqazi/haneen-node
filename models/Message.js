@@ -1,23 +1,18 @@
 const mongoose = require('mongoose');
+const { v4 } = require('uuid');
 
 const messageSchema = new mongoose.Schema(
   {
-    // like_id: {
-    //   type: mongoose.Schema.Types.ObjectId,
-    //   ref: 'Like',
-    //   required: true,
-    // },
-    sender: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
-      required: true,
+    _id: {
+      type: String,
+      default: () => v4().replace(/\-/g, ''),
     },
-    receiver: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
-      required: true,
+    chatRoomId: {
+      type: String,
+      ref: 'Room',
     },
-    message: { type: String, required: true },
+    postedByUser: { type: mongoose.Types.ObjectId, ref: 'User' },
+    message: mongoose.Schema.Types.Mixed,
     read: { type: Boolean, default: false },
   },
   { timestamps: true },
