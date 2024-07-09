@@ -19,10 +19,6 @@ const messageSchema = new mongoose.Schema(
     },
     message: { type: String, required: true },
     read: { type: Boolean, default: false },
-    lastMessage: {
-      content: { type: String, required: true },
-      createdAt: { type: Date, default: Date.now },
-    },
   },
   { timestamps: true },
 );

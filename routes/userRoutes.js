@@ -7,6 +7,7 @@ const {
   updateUser,
   deleteUser,
   getProfile,
+  getAllUsersForMatch,
 } = require('../controllers/userController');
 
 const router = express.Router();
@@ -18,5 +19,6 @@ router.route('/').post(createUser);
 router.route('/:id').get(getUserById);
 router.route('/:id').put(updateUser);
 router.route('/:id').delete(deleteUser);
+router.route('/match/data').get(getAllUsersForMatch);
 
 module.exports = router;

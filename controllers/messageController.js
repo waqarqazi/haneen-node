@@ -4,6 +4,7 @@
 const User = require('../models/User');
 const Message = require('../models/Message');
 const Chat = require('../models/Chat');
+const Room = require('../models/Room');
 // const addMessage = async (req, res) => {
 //   try {
 //     const { sender, receiver, message, like_id } = req.body;
@@ -44,28 +45,19 @@ const addMessage = async (req, res) => {
 };
 
 // Get chat list for a user
-const getChatList = async (req, res) => {
+const getConversation = async (req, res) => {
   try {
     const userId = req.body.user._id;
+    const roomId = req.params.roomId;
+
     const messages = await Message.find({
-      $or: [{ sender: userId }, { receiver: userId }],
-    })
-      .populate('sender', 'first_name last_name profile_picture username')
-      .sort({ updatedAt: -1 });
+      $or: [
+        { sender: roomId.split('-')[0], receiver: roomId.split('-')[1] },
+        { sender: roomId.split('-')[1], receiver: roomId.split('-')[0] },
+      ],
+    }).sort('timestamp');
 
-    // Flatten the sender fields and remove the sender object
-    const transformedMessages = messages.map(message => {
-      const { sender, ...rest } = message.toObject(); // Destructure to remove sender
-      return {
-        ...rest,
-        firstName: sender.first_name,
-        lastName: sender.last_name,
-        profileImage: sender.profile_picture,
-        sender_username: sender.username,
-      };
-    });
-
-    res.status(200).json(transformedMessages);
+    res.status(200).json(messages);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -84,21 +76,21 @@ const sendMessage = async (req, res) => {
   }
 };
 
-// Get messages between two users
-const getMessages = async (req, res) => {
-  try {
-    const { userId1, userId2 } = req.params;
-    const messages = await Message.find({
-      $or: [
-        { sender: userId1, receiver: userId2 },
-        { sender: userId2, receiver: userId1 },
-      ],
-    }).sort({ createdAt: 1 });
+// // Get messages between two users
+// const getMessages = async (req, res) => {
+//   try {
+//     const { userId1, userId2 } = req.params;
+//     const messages = await Message.find({
+//       $or: [
+//         { sender: userId1, receiver: userId2 },
+//         { sender: userId2, receiver: userId1 },
+//       ],
+//     }).sort({ createdAt: 1 });
 
-    res.status(200).json(messages);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
+//     res.status(200).json(messages);
+//   } catch (error) {
+//     res.status(500).json({ message: error.message });
+//   }
+// };
 
-module.exports = { getChatList, sendMessage, getMessages, addMessage };
+module.exports = { getConversation, sendMessage, addMessage };

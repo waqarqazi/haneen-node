@@ -10,6 +10,17 @@ const getAllUsers = async (req, res, next) => {
   }
 };
 
+// Get all users Formatch
+const getAllUsersForMatch = async (req, res, next) => {
+  try {
+    const users = await User.find().select(
+      'first_name last_name _id gender sexual_orientation bio profile_picture',
+    );
+    res.status(200).json(users);
+  } catch (error) {
+    next(new ErrorResponse('Failed to retrieve users', 500));
+  }
+};
 // Get user by ID
 const getUserById = async (req, res, next) => {
   try {
@@ -92,4 +103,5 @@ module.exports = {
   updateUser,
   deleteUser,
   getProfile,
+  getAllUsersForMatch,
 };

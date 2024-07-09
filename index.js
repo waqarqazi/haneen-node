@@ -7,6 +7,7 @@ const routes = require('./routes');
 const User = require('./models/User');
 const Message = require('./models/Message');
 const Like = require('./models/Like');
+const Room = require('./models/Room');
 
 const app = express();
 // const initializeFirebase = require('./config/firebase');
@@ -30,7 +31,7 @@ const port = process.env.PORT || 3000;
 const server = http.createServer(app);
 const io = socketio(server, {
   cors: {
-    origin: 'http://localhost:3000',
+    origin: 'http://127.0.0.1:3000',
     methods: ['GET', 'POST'],
   },
 });
@@ -41,13 +42,50 @@ global.io = io;
 io.on('connection', socket => {
   console.log('New client connected');
 
+  // Handle user liking another user
+  socket.on('like', async ({ userId, likedUserId }) => {
+    try {
+      const like = new Like({ user_id: userId, liked_user_id: likedUserId });
+      await like.save();
+      console.log('saved');
+
+      const mutualLike = await Like.findOne({
+        liked_user_id: likedUserId,
+        user_id: userId,
+      });
+
+      if (mutualLike) {
+        const roomId = [userId, likedUserId].sort().join('-');
+        io.to(roomId).emit('match', { message: "It's a match!", roomId });
+
+        // Check if a room already exists for these users
+        let room =
+          (await Room.findOne({ user1: userId, user2: likedUserId })) ||
+          (await Room.findOne({ user1: likedUserId, user2: userId }));
+
+        if (!room) {
+          room = new Room({ user1: userId, user2: likedUserId, roomId });
+          await room.save();
+        }
+        console.log('Existing room id', room.roomId);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  });
+
   // Join a chat room
-  socket.on('joinRoom', async ({ roomId }) => {
+  socket.on('joinRoom', ({ roomId }) => {
     socket.join(roomId);
     console.log(`User joined room: ${roomId}`);
 
     // Load chat history for the room
-    Message.find({ roomId })
+    Message.find({
+      $or: [
+        { sender: roomId.split('-')[0], receiver: roomId.split('-')[1] },
+        { sender: roomId.split('-')[1], receiver: roomId.split('-')[0] },
+      ],
+    })
       .sort('timestamp')
       .exec((err, messages) => {
         if (err) {
@@ -62,17 +100,26 @@ io.on('connection', socket => {
   socket.on(
     'sendMessage',
     async ({ roomId, senderId, receiverId, message }) => {
+      console.log('message', message);
       try {
         const newMessage = new Message({
           sender: senderId,
           receiver: receiverId,
           message,
-          roomId,
-          lastMessage: {
-            content: 'test',
-          },
         });
         await newMessage.save();
+
+        // Update last message in the room
+        await Room.findOneAndUpdate(
+          { roomId },
+          {
+            lastMessage: {
+              sender: senderId,
+              message,
+              timestamp: new Date(),
+            },
+          },
+        );
 
         io.to(roomId).emit('message', newMessage);
       } catch (err) {
