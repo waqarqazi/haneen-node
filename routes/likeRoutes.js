@@ -10,7 +10,7 @@ router.route('/').get(auth, likeController.getAllLikes);
 router.route('/:id').get(auth, likeController.getLikeById);
 
 // Create a new like
-router.route('/').post(auth, likeController.createLike);
+// router.route('/').post(auth, likeController.createLike);
 
 // Update a like
 router.route('/:id').put(auth, likeController.updateLike);

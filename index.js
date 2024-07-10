@@ -1,13 +1,16 @@
+/* eslint-disable */
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const http = require('http');
 const socketio = require('socket.io');
 const routes = require('./routes');
-const User = require('./models/User');
-const Message = require('./models/Message');
+//const User = require('./models/User');
+//const Message = require('./models/Message');
 const Like = require('./models/Like');
-const Room = require('./models/Room');
+const User = require('./models/User');
+const ChatMessageModel = require('./models/ChatMessage');
+//const Room = require('./models/Room');
 
 const app = express();
 // const initializeFirebase = require('./config/firebase');
@@ -31,7 +34,7 @@ const port = process.env.PORT || 3000;
 const server = http.createServer(app);
 const io = socketio(server, {
   cors: {
-    origin: 'http://127.0.0.1:3000',
+    origin: 'http://127.0.0.1:5000',
     methods: ['GET', 'POST'],
   },
 });
@@ -39,97 +42,278 @@ global.io = io;
 
 // Socket.io connection handler
 // Socket.io configuration
-io.on('connection', socket => {
-  console.log('New client connected');
+// io.on('connection', socket => {
+//   console.log('New client connected');
 
-  // Handle user liking another user
-  socket.on('like', async ({ userId, likedUserId }) => {
-    try {
-      const like = new Like({ user_id: userId, liked_user_id: likedUserId });
-      await like.save();
-      console.log('saved');
+//   // Handle user liking another user
+//   socket.on('like', async ({ userId, likedUserId }) => {
+//     try {
+//       const like = new Like({ user_id: userId, liked_user_id: likedUserId });
+//       await like.save();
+//       console.log('saved');
 
-      const mutualLike = await Like.findOne({
-        liked_user_id: likedUserId,
-        user_id: userId,
-      });
+//       const mutualLike = await Like.findOne({
+//         liked_user_id: likedUserId,
+//         user_id: userId,
+//       });
 
-      if (mutualLike) {
-        const roomId = [userId, likedUserId].sort().join('-');
-        io.to(roomId).emit('match', { message: "It's a match!", roomId });
+//       // if (mutualLike) {
+//       //   const roomId = [userId, likedUserId].sort().join('-');
+//       //   io.to(roomId).emit('match', { message: "It's a match!", roomId });
 
-        // Check if a room already exists for these users
-        let room =
-          (await Room.findOne({ user1: userId, user2: likedUserId })) ||
-          (await Room.findOne({ user1: likedUserId, user2: userId }));
+//       //   // Check if a room already exists for these users
+//       //   let room =
+//       //     (await Room.findOne({ user1: userId, user2: likedUserId })) ||
+//       //     (await Room.findOne({ user1: likedUserId, user2: userId }));
 
-        if (!room) {
-          room = new Room({ user1: userId, user2: likedUserId, roomId });
-          await room.save();
-        }
-        console.log('Existing room id', room.roomId);
-      }
-    } catch (err) {
-      console.error(err);
-    }
+//       //   if (!room) {
+//       //     room = new Room({ user1: userId, user2: likedUserId, roomId });
+//       //     await room.save();
+//       //   }
+//       //   console.log('Existing room id', room.roomId);
+//       // }
+//     } catch (err) {
+//       console.error(err);
+//     }
+//   });
+
+//   // Join a chat room
+//   socket.on('joinRoom', ({ roomId }) => {
+//     socket.join(roomId);
+//     console.log(`User joined room: ${roomId}`);
+
+//     // Load chat history for the room
+//     // Message.find({
+//     //   $or: [
+//     //     { sender: roomId.split('-')[0], receiver: roomId.split('-')[1] },
+//     //     { sender: roomId.split('-')[1], receiver: roomId.split('-')[0] },
+//     //   ],
+//     // })
+//     //   .sort('timestamp')
+//     //   .exec((err, messages) => {
+//     //     if (err) {
+//     //       console.error(err);
+//     //     } else {
+//     //       socket.emit('loadChatHistory', messages);
+//     //     }
+//     //   });
+//   });
+
+//   // Handle sending a message
+//   socket.on(
+//     'sendMessage',
+//     async ({ roomId, senderId, receiverId, message }) => {
+//       console.log('message', message);
+//       // try {
+//       //   const newMessage = new Message({
+//       //     sender: senderId,
+//       //     receiver: receiverId,
+//       //     message,
+//       //   });
+//       //   await newMessage.save();
+
+//       //   // Update last message in the room
+//       //   await Room.findOneAndUpdate(
+//       //     { roomId },
+//       //     {
+//       //       lastMessage: {
+//       //         sender: senderId,
+//       //         message,
+//       //         timestamp: new Date(),
+//       //       },
+//       //     },
+//       //   );
+
+//       //   io.to(roomId).emit('message', newMessage);
+//       // } catch (err) {
+//       //   console.error(err);
+//       // }
+//     },
+//   );
+
+//   socket.on('disconnect', () => {
+//     console.log('Client disconnected');
+//   });
+// });
+
+let users = [];
+io.on('connection', client => {
+  console.log('A user is connected with io ');
+  // add identity of user mapped to the socket id
+  client.on('identity', async ({ userId }) => {
+    users.push({
+      socketId: client.id,
+      userId,
+    });
   });
-
-  // Join a chat room
-  socket.on('joinRoom', ({ roomId }) => {
-    socket.join(roomId);
-    console.log(`User joined room: ${roomId}`);
-
-    // Load chat history for the room
-    Message.find({
-      $or: [
-        { sender: roomId.split('-')[0], receiver: roomId.split('-')[1] },
-        { sender: roomId.split('-')[1], receiver: roomId.split('-')[0] },
-      ],
-    })
-      .sort('timestamp')
-      .exec((err, messages) => {
-        if (err) {
-          console.error(err);
-        } else {
-          socket.emit('loadChatHistory', messages);
-        }
-      });
+  // event fired when the chat room is disconnected
+  client.on('disconnect', () => {
+    users = users.filter(user => user.socketId !== client.id);
+    console.log('onDisconnect', users);
   });
-
-  // Handle sending a message
-  socket.on(
-    'sendMessage',
-    async ({ roomId, senderId, receiverId, message }) => {
-      console.log('message', message);
-      try {
-        const newMessage = new Message({
-          sender: senderId,
-          receiver: receiverId,
-          message,
-        });
-        await newMessage.save();
-
-        // Update last message in the room
-        await Room.findOneAndUpdate(
-          { roomId },
-          {
-            lastMessage: {
-              sender: senderId,
-              message,
-              timestamp: new Date(),
-            },
-          },
+  // subscribe person to chat & other user as well
+  client.on(
+    'create',
+    async ({ otherUserId = [], name, picture, description }) => {
+      console.log('new create event called');
+      const { userId } = users.find(el => el.socketId === client.id);
+      if (otherUserId.length > 0 && userId) {
+        const { chatRoomId, isNew, message } = await ChatRoom.initiateChat(
+          [...otherUserId],
+          userId,
+          name,
+          picture,
+          description,
         );
-
-        io.to(roomId).emit('message', newMessage);
-      } catch (err) {
-        console.error(err);
+        console.log(chatRoomId, 'chatroomId');
+        const userSockets = users.filter(
+          user => user.userId === otherUserId[0],
+        );
+        userSockets.forEach(userInfo => {
+          const socketConn = io.sockets.sockets.get(userInfo.socketId);
+          if (socketConn) {
+            socketConn.join(chatRoomId);
+          }
+        });
+        client.join(chatRoomId);
+        io.to(chatRoomId).emit('OnJoin', {
+          message,
+          chatRoomId,
+          isNew,
+        });
       }
     },
   );
+  // subscribe group
+  client.on('subscribeGroup', async ({ chatRoomId, otherUserId = [] }) => {
+    console.log('new create group event called');
+    // const { userId } = users.find(el => el.socketId === client.id);
+    const userSockets = users.filter(user => otherUserId.includes(user.userId));
+    userSockets.forEach(userInfo => {
+      const socketConn = io.sockets.sockets.get(userInfo.socketId);
+      if (socketConn) {
+        socketConn.join(chatRoomId);
+      }
+    });
+    client.join(chatRoomId);
+    io.to(chatRoomId).emit('OnJoin', {
+      success: true,
+    });
+  });
 
-  socket.on('disconnect', () => {
-    console.log('Client disconnected');
+  // group message
+  client.on('groupMessage', async ({ roomId, messagePayload }) => {
+    console.log('new group message event called');
+    const { userId } = users.find(el => el.socketId === client.id);
+    if (roomId && messagePayload && userId) {
+      const post = new ChatMessageModel({
+        chatRoomId: roomId,
+        message: messagePayload,
+        postedByUser: userId,
+      });
+      const user = await User.findById(userId);
+      const chatRoomDb = await ChatRoom.findById(roomId);
+      const otherUsers = chatRoomDb.userIds.filter(
+        el => el.toString() !== user._id.toString(),
+      );
+      otherUsers.map(async el => {
+        const ouser = await User.findById(el);
+        if (ouser.notificationTokens.length > 0) {
+          sendNotification(
+            `${chatRoomDb.name}: ${user.firstName} ${user.lastName}`,
+            messagePayload,
+            user.profileImage || '',
+            ouser.notificationTokens,
+            'groupChat',
+            roomId,
+            {
+              groupName: chatRoomDb.name,
+              userIds: otherUsers.join('-'),
+            },
+          );
+        }
+      });
+      await post.save();
+      const postwithImage = await ChatMessageModel.findById(post._id).populate(
+        'postedByUser',
+        'firstName lastName profileImage',
+      );
+      io.to(roomId).emit('newMessageGroup', { post: postwithImage });
+    }
+  });
+
+  // message a chat room
+  client.on('message', async ({ roomId, messagePayload }) => {
+    console.log('new message event called');
+    const { userId } = users.find(el => el.socketId === client.id);
+    if (roomId && messagePayload && userId) {
+      const post = new ChatMessageModel({
+        chatRoomId: roomId,
+        message: messagePayload,
+        postedByUser: userId,
+      });
+      const user = await User.findById(userId);
+      const chatRoomDb = await ChatRoom.findById(roomId);
+      if (chatRoomDb.userIds[0].toString() == userId) {
+        const otherUser = await User.findById(chatRoomDb.chatInitiator);
+        if (otherUser.notificationTokens.length > 0) {
+          sendNotification(
+            `${user.firstName} ${user.lastName}`,
+            messagePayload,
+            user.profileImage || '',
+            otherUser.notificationTokens,
+            'chat',
+            roomId,
+            {
+              firstName: user.firstName.toString(),
+              lastName: user.lastName.toString(),
+              picture: user?.profileImage?.toString() || '',
+              userId: user._id.toString(),
+            },
+          );
+        }
+      } else {
+        const otherUser = await User.findById(chatRoomDb.userIds[0]);
+        // if (otherUser.notificationTokens.length > 0) {
+        //   sendNotification(
+        //     `${user.first_name} ${user.last_name}`,
+        //     messagePayload,
+        //     user.profileImage || '',
+        //     otherUser.notificationTokens,
+        //     'chat',
+        //     roomId,
+        //     {
+        //       firstName: user.firstName.toString(),
+        //       lastName: user.lastName.toString(),
+        //       picture: user?.profileImage?.toString() || '',
+        //       userId: user._id.toString(),
+        //     },
+        //   );
+        // }
+      }
+      // chatRoomDb.userIds.forEach(async el => {
+      //   const otherUser = await User.findById(el);
+      //   sendNotification(
+      //     `${user.firstName} ${user.lastName}`,
+      //     messagePayload,
+      //     user.profileImage || '',
+      //     otherUser.notificationTokens,
+      //   );
+      //   console.log(otherUser.notificationTokens);
+      // });
+      await post.save();
+      io.to(roomId).emit('new message', { post });
+    }
+  });
+
+  client.on('markUnread', async ({ roomId }) => {
+    await ChatMessageModel.updateMany(
+      {
+        chatRoomId: roomId,
+      },
+      { read: true },
+    );
   });
 });
+
 server.listen(port, () => console.log(`Listning on port ${port}...`));
