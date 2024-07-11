@@ -1,9 +1,9 @@
 /* eslint-disable */
-const ChatRoomModel = require('../../models/ChatRoom');
-const ChatMessageModel = require('../../models/ChatMessage');
-const { User } = require('../../models/User');
-const ChatRoom = require('../../models/ChatRoom');
-const { generatePromoCode } = require('../auth/helper');
+const ChatMessageModel = require('../models/ChatMessage');
+const User = require('../models/User');
+const ChatRoom = require('../models/ChatRoom');
+const { generatePromoCode } = require('./auth/helper');
+const ChatMessage = require('../models/ChatMessage');
 //const { s3Bucket } = require('../../config/aws');
 // Create a new chat room
 const createChatRoom = async (req, res) => {
@@ -22,24 +22,89 @@ const createChatRoom = async (req, res) => {
     res.status(400).json({ message: err.message });
   }
 };
+// Get all chat rooms
+const getAllChatRooms = async (req, res) => {
+  try {
+    const chatRooms = await ChatRoom.find().populate(
+      'chatInitiator',
+      'firstName lastName profileImage',
+    );
+    res.status(200).json({
+      success: true,
+      chatRooms,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      success: false,
+      message: 'An error occurred while fetching chat rooms.',
+      error: error.message,
+    });
+  }
+};
+const createMessage = async (req, res) => {
+  const { chatRoomId, message, postedByUser } = req.body;
+
+  if (!chatRoomId || !message || !postedByUser) {
+    return res
+      .status(400)
+      .json({ message: 'chatRoomId, message, and postedByUser are required' });
+  }
+
+  try {
+    const newMessage = await ChatMessage.createPostInChatRoom(
+      chatRoomId,
+      message,
+      postedByUser,
+    );
+    res.status(201).json(newMessage);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+const getAllMessages = async (req, res) => {
+  const { chatRoomId } = req.params;
+
+  if (!chatRoomId) {
+    return res.status(400).json({ message: 'chatRoomId is required' });
+  }
+
+  try {
+    const messages = await ChatMessage.find({ chatRoomId }).populate(
+      'postedByUser',
+    );
+    res.status(200).json(messages);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
 const getConversationByRoomId = async (req, res) => {
   try {
-    let { roomId } = req.params;
-    let room = await ChatRoomModel.getChatRoomByRoomId(roomId);
+    const { roomId } = req.params;
 
+    // Get the chat room by ID
+    const room = await ChatRoom.getChatRoomByRoomId(roomId);
     if (!room) {
       return res.status(400).json({
         success: false,
         message: 'No room exists for this id',
       });
     }
+
+    // Get users in the chat room
     const users = await User.find({ _id: { $in: room.userIds } }).select(
-      '-password -dob -gender -__v -notificationTokens -otp',
+      'username _id gender',
     );
-    const conversation = await ChatMessageModel.find({
-      chatRoomId: roomId,
-    })
-      .populate('postedByUser', 'firstName lastName profileImage')
+    if (!users) {
+      return res.status(404).json({
+        success: false,
+        message: 'Users not found',
+      });
+    }
+
+    // Get the conversation messages
+    const conversation = await ChatMessageModel.find({ chatRoomId: roomId })
+      .populate('postedByUser', 'first_name last_name profile_picture')
       .select('-chatRoomId -__v');
 
     const conversationInfo = {};
@@ -53,6 +118,7 @@ const getConversationByRoomId = async (req, res) => {
       conversationInfo.picture = users[0]?.profileImage || '';
     }
 
+    // Return the conversation details
     return res.status(200).json({
       success: true,
       conversationInfo,
@@ -61,139 +127,87 @@ const getConversationByRoomId = async (req, res) => {
       room,
     });
   } catch (error) {
-    return res.status(500).json({ success: false, error });
+    console.error(error); // Log the error for debugging purposes
+    return res.status(500).json({ success: false, error: error.message });
   }
 };
 
 const getAllChatList = async (req, res) => {
-  let { search } = req.query;
-  // let { page, limit } = req.query;
-  // if (!page || page == 0) {
-  //   page = 1;
-  // }
-  // if (!limit || limit == 0) {
-  //   limit = 10;
-  // }
-  // page -= 1;
+  try {
+    const { search } = req.query;
+    const userId = req.body.user._id;
 
-  let allConversation = await ChatRoomModel.find({
-    $or: [
-      { userIds: { $in: [req.user.userId] } },
-      { chatInitiator: req.user.userId },
-    ],
-    userIds: { $size: 1 },
-  });
-  // let allConversation1 = await ChatRoomModel.aggregate([
-  //   {
-  //     $match: {
-  //       $or: [
-  //         { userIds: { $in: [req.user.userId] } },
-  //         { chatInitiator: mongoose.Types.ObjectId(req.user.userId) },
-  //       ],
-  //     },
-  //   },
-  //   {
-  //     $lookup: {
-  //       from: 'users',
-  //       localField: 'chatInitiator',
-  //       foreignField: '_id',
-  //       as: 'chatInitiator',
-  //     },
-  //   },
-  //   { $unwind: '$userIds' },
-  //   {
-  //     $lookup: {
-  //       from: 'users',
-  //       localField: 'userIds',
-  //       foreignField: '_id',
-  //       as: 'userIds',
-  //     },
-  //   },
-  // ]);
-  // .skip(page * limit)
-  // .limit(limit);
-
-  // return res.send(allConversation);+
-
-  if (!allConversation) {
-    return res.json({ error: 'No Chat Found' });
-  }
-  let secondUser = '';
-  allConversation = await Promise.all(
-    allConversation.map(async el => {
-      el = el?.toObject();
-      if (el.name) {
-        el.type = 'group';
-      } else {
-        el.type = 'private';
-      }
-      if (el.type === 'private') {
-        if (req.user.userId === el.chatInitiator.toString()) {
-          secondUser = el.userIds[0];
-          const user = await User.findById(secondUser);
-          el.picture = user?.profileImage || '';
-          el.firstName = user?.firstName || '';
-          el.lastName = user?.lastName || '';
-          el.secondUserId = user?._id || '';
-        } else if (req.user.userId === el.userIds[0]) {
-          const user = await User.findById(el.chatInitiator);
-          el.picture = user?.profileImage || '';
-          el.firstName = user?.firstName || '';
-          el.lastName = user?.lastName || '';
-          el.secondUserId = user?._id || '';
-        }
-      }
-      return el;
-    }),
-  );
-  allConversation = (
-    await Promise.all(
-      allConversation.map(async el => {
-        const messages = await ChatMessageModel.find({
-          chatRoomId: el._id,
-        }).count();
-        return messages && el;
-      }),
-    )
-  ).filter(e => e);
-
-  allConversation = await Promise.all(
-    allConversation.map(async el => {
-      el.lastMessage = await ChatMessageModel.findOne({
-        chatRoomId: el._id,
-      }).sort('-createdAt');
-      el.unreadCount = await ChatMessageModel.find({
-        chatRoomId: el._id,
-        read: false,
-      }).count();
-      return el;
-    }),
-  );
-
-  let totalChatList = await ChatRoomModel.find({
-    $or: [
-      { userIds: { $in: [req.user.userId] } },
-      { chatInitiator: req.user.userId },
-    ],
-  }).count();
-
-  // it will be used for pagination
-  // const calcPage = totalChatList / limit;
-  // totalPages: Math.ceil(+calcPage)
-  if (search) {
-    allConversation = allConversation.filter(el => {
-      if (
-        el.firstName.toLowerCase().includes(search.toLowerCase()) ||
-        el.lastName.toLowerCase().includes(search.toLowerCase())
-      ) {
-        return true;
-      }
-      return false;
+    // Fetch all conversations involving the user
+    let allConversation = await ChatRoom.find({
+      $or: [{ userIds: userId }, { chatInitiator: userId }],
     });
-  }
-  res.json(allConversation);
-};
 
+    if (!allConversation.length) {
+      return res.json({ error: 'No Chat Found' });
+    }
+
+    allConversation = await Promise.all(
+      allConversation.map(async el => {
+        el = el?.toObject();
+        const secondUserId =
+          el.chatInitiator.toString() === userId
+            ? el.userIds[0]
+            : el.chatInitiator;
+        const user = await User.findById(secondUserId);
+        el.picture = user?.profile_picture || '';
+        el.firstName = user?.first_name || '';
+        el.lastName = user?.last_name || '';
+        el.secondUserId = user?._id || '';
+        return el;
+      }),
+    );
+
+    allConversation = (
+      await Promise.all(
+        allConversation.map(async el => {
+          const messagesCount = await ChatMessageModel.countDocuments({
+            chatRoomId: el._id,
+          });
+          return messagesCount ? el : null;
+        }),
+      )
+    ).filter(e => e);
+
+    allConversation = await Promise.all(
+      allConversation.map(async el => {
+        el.lastMessage = await ChatMessageModel.findOne({
+          chatRoomId: el._id,
+        }).sort('-createdAt');
+        el.unreadCount = await ChatMessageModel.countDocuments({
+          chatRoomId: el._id,
+          read: false,
+        });
+        return el;
+      }),
+    );
+
+    // const totalChatList = await ChatRoom.countDocuments({
+    //   $or: [
+    //     { userIds: { $in: [userId] } },
+    //     { chatInitiator: userId },
+    //   ],
+    // });
+
+    if (search) {
+      allConversation = allConversation.filter(el => {
+        return (
+          el.first_name.toLowerCase().includes(search.toLowerCase()) ||
+          el.lastName.toLowerCase().includes(search.toLowerCase())
+        );
+      });
+    }
+
+    res.json(allConversation);
+  } catch (error) {
+    console.error('Error fetching chat list', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+};
 const markRead = async (req, res) => {
   const { roomId } = req.params;
   if (!roomId) {
@@ -215,7 +229,7 @@ const createGroup = async (req, res) => {
     return res.json({ error: 'Group name is required field' });
   }
   if (members?.length > 0) {
-    members.push(req.user.userId);
+    members.push(req.body.user._id);
   }
   if (!(members?.length >= 2)) {
     return res.json({ error: 'minimum 2 members required for group creation' });
@@ -242,7 +256,7 @@ const createGroup = async (req, res) => {
   //   }
   const newGroup = await ChatRoom.create({
     userIds: members,
-    chatInitiator: req.user.userId,
+    chatInitiator: req.body.user._id,
     name,
     ...(picture && { picture }),
     ...(description && { description }),
@@ -253,7 +267,7 @@ const createGroup = async (req, res) => {
 const getChatGroups = async (req, res) => {
   const { search = '' } = req.query;
   const chatGroups = await ChatRoom.find({
-    userIds: req.user.userId,
+    userIds: req.body.user._id,
     'userIds.1': { $exists: true },
     name: { $regex: search, $options: 'i' },
   }).populate({
@@ -310,6 +324,8 @@ const leaveGroup = async (req, res) => {
 
 module.exports = {
   createChatRoom,
+  getAllChatRooms,
+  createMessage,
   getConversationByRoomId,
   getAllChatList,
   markRead,
@@ -317,4 +333,5 @@ module.exports = {
   getChatGroups,
   editGroup,
   leaveGroup,
+  getAllMessages,
 };

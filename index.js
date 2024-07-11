@@ -10,6 +10,9 @@ const routes = require('./routes');
 const Like = require('./models/Like');
 const User = require('./models/User');
 const ChatMessageModel = require('./models/ChatMessage');
+const ChatRoom = require('./models/ChatRoom');
+const ChatMessage = require('./models/ChatMessage');
+const Match = require('./models/Match');
 //const Room = require('./models/Room');
 
 const app = express();
@@ -34,7 +37,7 @@ const port = process.env.PORT || 3000;
 const server = http.createServer(app);
 const io = socketio(server, {
   cors: {
-    origin: 'http://127.0.0.1:5000',
+    origin: 'http://192.168.1.16:3000',
     methods: ['GET', 'POST'],
   },
 });
@@ -136,6 +139,66 @@ global.io = io;
 //   });
 // });
 
+///likes handling
+// Likes namespace connection
+const likesNamespace = io.of('/likes');
+
+likesNamespace.on('connection', client => {
+  console.log('A user connected to the likes namespace');
+
+  client.on('like', async ({ userId, likedUserId }) => {
+    console.log('likedUserId', likedUserId);
+    try {
+      const like = new Like({ userId, likedUserId });
+      await like.save();
+      console.log('likedUserId', like);
+      // Emit like event back to client
+      likesNamespace.emit('like', { userId, likedUserId });
+
+      // Check if there's a match
+      const reciprocalLike = await Like.findOne({
+        userId: likedUserId,
+        likedUserId: userId,
+      });
+      if (reciprocalLike) {
+        const newMatch = new Match({ user1: userId, user2: likedUserId });
+        console.log('new', newMatch);
+        await newMatch.save();
+
+        // Notify both users about the match
+        console.log('userId', userId);
+        console.log('likedUserId', likedUserId);
+
+        client.join(userId.toString());
+        client.join(likedUserId.toString());
+
+        likesNamespace
+          .to(userId.toString())
+          .emit('match', { user1: userId, user2: likedUserId });
+        likesNamespace
+          .to(likedUserId.toString())
+          .emit('match', { user1: userId, user2: likedUserId });
+        console.log('Match');
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  });
+
+  // Add identity of user mapped to the socket id
+  client.on('identity', async ({ userId }) => {
+    users.push({
+      socketId: client.id,
+      userId,
+    });
+  });
+
+  client.on('disconnect', () => {
+    users = users.filter(user => user.socketId !== client.id);
+    console.log('onDisconnect', users);
+  });
+});
+
 let users = [];
 io.on('connection', client => {
   console.log('A user is connected with io ');
@@ -218,20 +281,20 @@ io.on('connection', client => {
       );
       otherUsers.map(async el => {
         const ouser = await User.findById(el);
-        if (ouser.notificationTokens.length > 0) {
-          sendNotification(
-            `${chatRoomDb.name}: ${user.firstName} ${user.lastName}`,
-            messagePayload,
-            user.profileImage || '',
-            ouser.notificationTokens,
-            'groupChat',
-            roomId,
-            {
-              groupName: chatRoomDb.name,
-              userIds: otherUsers.join('-'),
-            },
-          );
-        }
+        // if (ouser.notificationTokens.length > 0) {
+        //   sendNotification(
+        //     `${chatRoomDb.name}: ${user.firstName} ${user.lastName}`,
+        //     messagePayload,
+        //     user.profileImage || '',
+        //     ouser.notificationTokens,
+        //     'groupChat',
+        //     roomId,
+        //     {
+        //       groupName: chatRoomDb.name,
+        //       userIds: otherUsers.join('-'),
+        //     },
+        //   );
+        // }
       });
       await post.save();
       const postwithImage = await ChatMessageModel.findById(post._id).populate(
@@ -244,10 +307,11 @@ io.on('connection', client => {
 
   // message a chat room
   client.on('message', async ({ roomId, messagePayload }) => {
-    console.log('new message event called');
+    console.log('new message event called==>');
     const { userId } = users.find(el => el.socketId === client.id);
+    console.log('messagePayload', messagePayload);
     if (roomId && messagePayload && userId) {
-      const post = new ChatMessageModel({
+      const post = new ChatMessage({
         chatRoomId: roomId,
         message: messagePayload,
         postedByUser: userId,
@@ -256,27 +320,27 @@ io.on('connection', client => {
       const chatRoomDb = await ChatRoom.findById(roomId);
       if (chatRoomDb.userIds[0].toString() == userId) {
         const otherUser = await User.findById(chatRoomDb.chatInitiator);
-        if (otherUser.notificationTokens.length > 0) {
-          sendNotification(
-            `${user.firstName} ${user.lastName}`,
-            messagePayload,
-            user.profileImage || '',
-            otherUser.notificationTokens,
-            'chat',
-            roomId,
-            {
-              firstName: user.firstName.toString(),
-              lastName: user.lastName.toString(),
-              picture: user?.profileImage?.toString() || '',
-              userId: user._id.toString(),
-            },
-          );
-        }
+        // if (otherUser.notificationTokens.length > 0) {
+        //   sendNotification(
+        //     `${user.firstName} ${user.lastName}`,
+        //     messagePayload,
+        //     user.profileImage || '',
+        //     otherUser.notificationTokens,
+        //     'chat',
+        //     roomId,
+        //     {
+        //       firstName: user.firstName.toString(),
+        //       lastName: user.lastName.toString(),
+        //       picture: user?.profileImage?.toString() || '',
+        //       userId: user._id.toString(),
+        //     },
+        //   );
+        // }
       } else {
         const otherUser = await User.findById(chatRoomDb.userIds[0]);
         // if (otherUser.notificationTokens.length > 0) {
         //   sendNotification(
-        //     `${user.first_name} ${user.last_name}`,
+        //     `${user.firstName} ${user.lastName}`,
         //     messagePayload,
         //     user.profileImage || '',
         //     otherUser.notificationTokens,

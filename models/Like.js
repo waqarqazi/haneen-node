@@ -1,17 +1,16 @@
 const mongoose = require('mongoose');
+const Match = require('./Match'); // Add this line
 
 const likeSchema = new mongoose.Schema({
-  user_id: {
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  likedUserId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
     required: true,
   },
-  liked_user_id: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-    required: true,
-  },
-  liked_at: { type: Date, default: Date.now },
+  timestamp: { type: Date, default: Date.now },
 });
 
-module.exports = mongoose.model('Like', likeSchema);
+const Like = mongoose.model('Like', likeSchema);
+
+module.exports = Like;

@@ -28,49 +28,32 @@ const getLikeById = async (req, res) => {
 };
 
 // Create a new like
-// const createLike = async (req, res) => {
-//   const { liked_user_id } = req.body;
-//   let userId = req.body.user._id;
-//   try {
-//     // Check if the like already exists
-//     const existingLike = await Like.findOne({
-//       user_id: userId,
-//       liked_user_id: liked_user_id,
-//     });
+const createLike = async (req, res) => {
+  const { likedUserId } = req.body;
+  let userId = req.body.user._id;
+  const newLike = new Like({ userId, likedUserId });
+  await newLike.save();
+  res.json(newLike);
+  // newLike.save((err, like) => {
+  //     if (err) return res.status(500).send(err);
 
-//     if (!existingLike) {
-//       const like = new Like({ user_id: userId, liked_user_id: liked_user_id });
-//       await like.save();
-//     }
+  //     // Check if the liked user also liked this user
+  //     Like.findOne({ userId: likedUserId, likedUserId: userId }, (err, reciprocalLike) => {
+  //         if (err) return res.status(500).send(err);
 
-//     // Check if there is a mutual like
-//     const mutualLike = await Like.findOne({
-//       user_id: liked_user_id,
-//       liked_user_id: userId,
-//     });
-
-//     // if (mutualLike) {
-//     const roomId = [userId, liked_user_id].sort().join('-');
-
-//     // Check if a room already exists for these users
-//     let room =
-//       (await Room.findOne({ user1: userId, user2: liked_user_id })) ||
-//       (await Room.findOne({ user1: liked_user_id, user2: userId }));
-
-//     if (!room) {
-//       room = new Room({ user1: userId, user2: liked_user_id, roomId });
-//       await room.save();
-//     }
-
-//     return res.json({ message: "It's a match!", roomId: room.roomId });
-//     // }
-
-//     //  res.json({ message: 'Like recorded' });
-//   } catch (err) {
-//     console.error(err);
-//     res.status(500).json({ message: 'Internal server error' });
-//   }
-// };
+  //         if (reciprocalLike) {
+  //             // If a mutual like is found, create a new match
+  //             const newMatch = new Match({ user1: userId, user2: likedUserId });
+  //             newMatch.save((err, match) => {
+  //                 if (err) return res.status(500).send(err);
+  //                 res.status(200).json({ like, match });
+  //             });
+  //         } else {
+  //             res.status(200).json({ like });
+  //         }
+  //     });
+  // });
+};
 
 // Update a like
 const updateLike = async (req, res) => {
@@ -110,7 +93,7 @@ const deleteLike = async (req, res) => {
 module.exports = {
   getAllLikes,
   getLikeById,
-  // createLike,
+  createLike,
   updateLike,
   deleteLike,
 };

@@ -1,3 +1,5 @@
+const Like = require('../models/Like.js');
+const Match = require('../models/Match.js');
 const User = require('../models/User.js');
 const ErrorResponse = require('../utils/errorResponse.js');
 // Get all users
@@ -13,9 +15,34 @@ const getAllUsers = async (req, res, next) => {
 // Get all users Formatch
 const getAllUsersForMatch = async (req, res, next) => {
   try {
-    const users = await User.find().select(
+    const userId = req.body.user._id; // or req.body.userId depending on where you get the user ID from
+
+    // Get the list of users who have matched with the current user
+    const matches = await Match.find({
+      $or: [{ user1: userId }, { user2: userId }],
+    }).select('user1 user2');
+
+    const matchedUserIds = matches.map(match => {
+      if (match.user1.toString() === userId.toString()) {
+        return match.user2;
+      }
+      return match.user1;
+    });
+
+    // Get the list of users who have been liked by the current user
+    const likes = await Like.find({ userId }).select('likedUserId');
+    const likedUserIds = likes.map(like => like.likedUserId);
+
+    // Combine matched and liked user IDs to exclude them
+    const excludedUserIds = [...matchedUserIds, ...likedUserIds, userId];
+
+    // Get all users excluding the current user and users who have matched or been liked by the current user
+    const users = await User.find({
+      _id: { $nin: excludedUserIds },
+    }).select(
       'first_name last_name _id gender sexual_orientation bio profile_picture',
     );
+
     res.status(200).json(users);
   } catch (error) {
     next(new ErrorResponse('Failed to retrieve users', 500));

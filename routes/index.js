@@ -11,7 +11,7 @@ const subscriptionRoutes = require('./subscriptionRoutes.js');
 const reportRoutes = require('./reportRoutes.js');
 const hobbyRoutes = require('./hobbyRoute.js');
 const questionRoutes = require('./questionRoute.js');
-const chatRoutes = require('./chat/index.js');
+const chatRoutes = require('./chatRoutes.js');
 
 router.use('/auth', authRoutes);
 router.use('/users', userRoutes);
