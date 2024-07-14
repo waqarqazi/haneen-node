@@ -8,8 +8,12 @@ const likeSchema = new mongoose.Schema({
     ref: 'User',
     required: true,
   },
+
   timestamp: { type: Date, default: Date.now },
 });
+
+// Add a unique compound index to prevent duplicate likes
+likeSchema.index({ userId: 1, likedUserId: 1 }, { unique: true });
 
 const Like = mongoose.model('Like', likeSchema);
 

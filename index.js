@@ -13,6 +13,7 @@ const ChatMessageModel = require('./models/ChatMessage');
 const ChatRoom = require('./models/ChatRoom');
 const ChatMessage = require('./models/ChatMessage');
 const Match = require('./models/Match');
+const Skip = require('./models/SkipUser');
 //const Room = require('./models/Room');
 
 const app = express();
@@ -37,7 +38,7 @@ const port = process.env.PORT || 3000;
 const server = http.createServer(app);
 const io = socketio(server, {
   cors: {
-    origin: 'http://192.168.1.16:3000',
+    origin: 'http://192.168.0.100:3000',
     methods: ['GET', 'POST'],
   },
 });
@@ -145,21 +146,57 @@ const likesNamespace = io.of('/likes');
 
 likesNamespace.on('connection', client => {
   console.log('A user connected to the likes namespace');
+  //Skip Handling
 
+  client.on('skip', async ({ userId, skippedUserId }) => {
+    console.log('skippedUserId', skippedUserId);
+    if (!userId || !skippedUserId) {
+      likesNamespace.emit('skip', 'Invalid userId or skippedUserId');
+      return;
+    }
+    try {
+      const existingSkip = await Skip.findOne({ userId, skippedUserId });
+      console.log('existingSkip', existingSkip);
+      if (existingSkip) {
+        likesNamespace.emit('skip', 'Already Skiped');
+      } else {
+        const skip = new Skip({ userId, skippedUserId });
+        await skip.save();
+        console.log('creSkip', skip);
+        // Emit skip event back to client
+        likesNamespace.emit('skip', { userId, skippedUserId });
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  });
+
+  //Like Handling
   client.on('like', async ({ userId, likedUserId }) => {
     console.log('likedUserId', likedUserId);
+    if (!userId || !likedUserId) {
+      likesNamespace.emit('like', 'Invalid userId or likedUserId');
+      return;
+    }
     try {
-      const like = new Like({ userId, likedUserId });
-      await like.save();
-      console.log('likedUserId', like);
-      // Emit like event back to client
-      likesNamespace.emit('like', { userId, likedUserId });
+      const existingLike = await Like.findOne({ userId, likedUserId });
+      console.log('existingLike', existingLike);
+      if (existingLike) {
+        likesNamespace.emit('like', 'Already Liked');
+      } else {
+        const like = new Like({ userId, likedUserId });
+        await like.save();
+        console.log('creLike', like);
+        // Emit like event back to client
+        likesNamespace.emit('like', { userId, likedUserId });
+      }
 
       // Check if there's a match
       const reciprocalLike = await Like.findOne({
         userId: likedUserId,
         likedUserId: userId,
       });
+      console.log('reciprocalLike', reciprocalLike);
       if (reciprocalLike) {
         const newMatch = new Match({ user1: userId, user2: likedUserId });
         console.log('new', newMatch);
@@ -217,12 +254,12 @@ io.on('connection', client => {
   // subscribe person to chat & other user as well
   client.on(
     'create',
-    async ({ otherUserId = [], name, picture, description }) => {
+    async ({ likedUserId = [], name, picture, description }) => {
       console.log('new create event called');
       const { userId } = users.find(el => el.socketId === client.id);
-      if (otherUserId.length > 0 && userId) {
+      if (likedUserId.length > 0 && userId) {
         const { chatRoomId, isNew, message } = await ChatRoom.initiateChat(
-          [...otherUserId],
+          [...likedUserId],
           userId,
           name,
           picture,
@@ -230,7 +267,7 @@ io.on('connection', client => {
         );
         console.log(chatRoomId, 'chatroomId');
         const userSockets = users.filter(
-          user => user.userId === otherUserId[0],
+          user => user.userId === likedUserId[0],
         );
         userSockets.forEach(userInfo => {
           const socketConn = io.sockets.sockets.get(userInfo.socketId);
@@ -248,10 +285,10 @@ io.on('connection', client => {
     },
   );
   // subscribe group
-  client.on('subscribeGroup', async ({ chatRoomId, otherUserId = [] }) => {
+  client.on('subscribeGroup', async ({ chatRoomId, likedUserId = [] }) => {
     console.log('new create group event called');
     // const { userId } = users.find(el => el.socketId === client.id);
-    const userSockets = users.filter(user => otherUserId.includes(user.userId));
+    const userSockets = users.filter(user => likedUserId.includes(user.userId));
     userSockets.forEach(userInfo => {
       const socketConn = io.sockets.sockets.get(userInfo.socketId);
       if (socketConn) {

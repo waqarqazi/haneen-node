@@ -1,13 +1,13 @@
 /* eslint-disable */
 
-const Like = require('../models/Like');
+const Skip = require('../models/SkipUser.js');
 // const Room = require('../models/Room.js');
 const ErrorResponse = require('../utils/errorResponse.js');
 const socketIo = require('socket.io');
 // Get all likes
-const getAllLikes = async (req, res) => {
+const getAllSkip = async (req, res) => {
   try {
-    const likes = await Like.find();
+    const likes = await Skip.find();
     res.json(likes);
   } catch (err) {
     return res.status(500).json({ status: false, err });
@@ -15,11 +15,11 @@ const getAllLikes = async (req, res) => {
 };
 
 // Get like by ID
-const getLikeById = async (req, res) => {
+const getSkipById = async (req, res) => {
   try {
-    const like = await Like.findById(req.params.id);
+    const like = await Skip.findById(req.params.id);
     if (!like) {
-      return res.status(404).json({ msg: 'Like not found' });
+      return res.status(404).json({ msg: 'Skip not found' });
     }
     res.json(like);
   } catch (err) {
@@ -28,21 +28,21 @@ const getLikeById = async (req, res) => {
 };
 
 // Create a new like
-const createLike = async (req, res) => {
+const createSkip = async (req, res) => {
   try {
-    const { likedUserId } = req.body;
+    const { skippedUserId } = req.body;
     let userId = req.body.user._id;
     console.log('userId', userId);
-    const existingLike = await Like.findOne({ userId, likedUserId });
-    if (existingLike) {
+    const existingSkip = await Skip.findOne({ userId, skippedUserId });
+    if (existingSkip) {
       return res.json({
         success: false,
-        message: 'User has already been liked',
+        message: 'User has already been Skpied',
       });
     }
-    const newLike = new Like({ userId, likedUserId });
-    await newLike.save();
-    res.json(newLike);
+    const newSkip = new Skip({ userId, skippedUserId });
+    await newSkip.save();
+    res.json(newSkip);
   } catch (error) {
     console.log('error', error);
     res.json({ success: false, message: error });
@@ -50,14 +50,14 @@ const createLike = async (req, res) => {
 };
 
 // Update a like
-const updateLike = async (req, res) => {
+const updateSkip = async (req, res) => {
   const { liked_user_id } = req.body;
 
   try {
-    let like = await Like.findById(req.params.id);
+    let like = await Skip.findById(req.params.id);
 
     if (!like) {
-      return res.status(200).json({ msg: 'Like not found' });
+      return res.status(200).json({ msg: 'Skip not found' });
     }
 
     like.liked_user_id = liked_user_id || like.liked_user_id;
@@ -70,24 +70,24 @@ const updateLike = async (req, res) => {
 };
 
 // Delete a like
-const deleteLike = async (req, res) => {
+const deleteSkip = async (req, res) => {
   try {
-    let like = await Like.findById(req.params.id);
+    let like = await Skip.findById(req.params.id);
 
     if (!like) {
-      return res.status(404).json({ msg: 'Like not found' });
+      return res.status(404).json({ msg: 'Skip not found' });
     }
 
     await like.remove();
-    res.json({ msg: 'Like removed' });
+    res.json({ msg: 'Skip removed' });
   } catch (err) {
     return res.status(500).json({ status: false, err });
   }
 };
 module.exports = {
-  getAllLikes,
-  getLikeById,
-  createLike,
-  updateLike,
-  deleteLike,
+  getAllSkip,
+  getSkipById,
+  createSkip,
+  updateSkip,
+  deleteSkip,
 };
