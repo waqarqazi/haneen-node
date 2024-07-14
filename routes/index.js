@@ -15,7 +15,7 @@ const chatRoutes = require('./chatRoutes.js');
 
 router.use('/auth', authRoutes);
 router.use('/users', userRoutes);
-router.use('/matches', matchRoutes);
+router.use('/match', matchRoutes);
 router.use('/likes', likeRoutes);
 router.use('/blocks', blockRoutes);
 router.use('/subscriptions', subscriptionRoutes);

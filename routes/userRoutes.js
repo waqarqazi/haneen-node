@@ -19,6 +19,6 @@ router.route('/').post(createUser);
 router.route('/:id').get(getUserById);
 router.route('/:id').put(updateUser);
 router.route('/:id').delete(deleteUser);
-router.route('/match/data').get(auth, getAllUsersForMatch);
+router.route('/match/fetchMatches').get(auth, getAllUsersForMatch);
 
 module.exports = router;

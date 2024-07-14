@@ -1,7 +1,41 @@
+/* eslint-disable */
+const Album = require('../models/Album.js');
 const Like = require('../models/Like.js');
 const Match = require('../models/Match.js');
 const User = require('../models/User.js');
 const ErrorResponse = require('../utils/errorResponse.js');
+const calculateAge = dateOfBirth => {
+  const today = new Date();
+  const birthDate = new Date(dateOfBirth);
+  let age = today.getFullYear() - birthDate.getFullYear();
+  const monthDiff = today.getMonth() - birthDate.getMonth();
+  if (
+    monthDiff < 0 ||
+    (monthDiff === 0 && today.getDate() < birthDate.getDate())
+  ) {
+    age--;
+  }
+  return age;
+};
+
+const getDistance = (location1, location2) => {
+  const { latitude: lat1, longitude: lon1 } = location1;
+  const { latitude: lat2, longitude: lon2 } = location2;
+
+  if (!lat1 || !lon1 || !lat2 || !lon2) return Infinity;
+
+  const R = 6371; // Radius of the Earth in kilometers
+  const dLat = ((lat2 - lat1) * Math.PI) / 180;
+  const dLon = ((lon2 - lon1) * Math.PI) / 180;
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos((lat1 * Math.PI) / 180) *
+      Math.cos((lat2 * Math.PI) / 180) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c; // Distance in kilometers
+};
 // Get all users
 const getAllUsers = async (req, res, next) => {
   try {
@@ -14,40 +48,116 @@ const getAllUsers = async (req, res, next) => {
 
 // Get all users Formatch
 const getAllUsersForMatch = async (req, res, next) => {
-  try {
-    const userId = req.body.user._id; // or req.body.userId depending on where you get the user ID from
+  const userId = req.body.user._id;
+  const { page = 1, limit = 10 } = req.query; // Default to page 1, limit 10
 
-    // Get the list of users who have matched with the current user
+  try {
+    const user = await User.findById(userId);
+    if (!user) {
+      console.log(`User with ID ${userId} not found`);
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    console.log(`User found: ${user.username}`);
+
+    // Find users liked by the current user
+    const likedUsers = await Like.find({ userId: userId }).select(
+      'likedUserId',
+    );
+    const likedUserIds = likedUsers.map(like => like.likedUserId.toString());
+
+    console.log(`Liked users: ${likedUserIds}`);
+
+    // Find users who have matched with the current user
     const matches = await Match.find({
       $or: [{ user1: userId }, { user2: userId }],
     }).select('user1 user2');
+    const matchedUserIds = matches.reduce((acc, match) => {
+      if (match.user1.toString() !== userId) acc.push(match.user1.toString());
+      if (match.user2.toString() !== userId) acc.push(match.user2.toString());
+      return acc;
+    }, []);
 
-    const matchedUserIds = matches.map(match => {
-      if (match.user1.toString() === userId.toString()) {
-        return match.user2;
-      }
-      return match.user1;
+    console.log(`Matched users: ${matchedUserIds}`);
+
+    // Log the user's preferences
+    console.log(`User's preferences: ${JSON.stringify(user.preferences)}`);
+
+    // Count total potential matches
+    const totalPotentialMatches = await User.countDocuments({
+      _id: { $ne: userId, $nin: [...likedUserIds, ...matchedUserIds] },
+      gender: user.preferences.preferred_gender,
+      date_of_birth: {
+        $gte: new Date(
+          new Date().setFullYear(
+            new Date().getFullYear() - user.preferences.preferred_age_range[1],
+          ),
+        ),
+        $lte: new Date(
+          new Date().setFullYear(
+            new Date().getFullYear() - user.preferences.preferred_age_range[0],
+          ),
+        ),
+      },
+      interests: { $in: user.preferences.preferred_interests },
     });
 
-    // Get the list of users who have been liked by the current user
-    const likes = await Like.find({ userId }).select('likedUserId');
-    const likedUserIds = likes.map(like => like.likedUserId);
+    console.log(`Total potential matches: ${totalPotentialMatches}`);
 
-    // Combine matched and liked user IDs to exclude them
-    const excludedUserIds = [...matchedUserIds, ...likedUserIds, userId];
-
-    // Get all users excluding the current user and users who have matched or been liked by the current user
+    // Find potential matches with pagination
     const users = await User.find({
-      _id: { $nin: excludedUserIds },
-    }).select(
-      'first_name last_name _id gender sexual_orientation bio profile_picture',
+      _id: { $ne: userId, $nin: [...likedUserIds, ...matchedUserIds] },
+      gender: user.preferences.preferred_gender,
+      date_of_birth: {
+        $gte: new Date(
+          new Date().setFullYear(
+            new Date().getFullYear() - user.preferences.preferred_age_range[1],
+          ),
+        ),
+        $lte: new Date(
+          new Date().setFullYear(
+            new Date().getFullYear() - user.preferences.preferred_age_range[0],
+          ),
+        ),
+      },
+      interests: { $in: user.preferences.preferred_interests },
+    })
+      .skip((page - 1) * limit)
+      .limit(limit)
+      .lean(); // .lean() to get plain JS object
+
+    users.forEach(u => {
+      u.age = calculateAge(u.date_of_birth);
+    });
+
+    console.log(`Paginated matches: ${users.length}`);
+
+    // Populate albums for potential matches
+    const populatedMatches = await Promise.all(
+      users.map(async match => {
+        const albums = await Album.find({ user: match._id });
+        return { ...match, albums };
+      }),
     );
 
-    res.status(200).json(users);
+    console.log(`Populated matches: ${populatedMatches.length}`);
+
+    if (populatedMatches.length === 0) {
+      return res.status(200).json({ message: 'No matches found' });
+    }
+
+    res.json({
+      totalMatches: totalPotentialMatches,
+      totalPages: Math.ceil(totalPotentialMatches / limit),
+      currentPage: parseInt(page),
+      matches: populatedMatches,
+    });
   } catch (error) {
-    next(new ErrorResponse('Failed to retrieve users', 500));
+    console.error('Error fetching matches:', error);
+    res.status(500).json({ message: 'Server Error', error });
   }
 };
+
 // Get user by ID
 const getUserById = async (req, res, next) => {
   try {
@@ -57,7 +167,7 @@ const getUserById = async (req, res, next) => {
     }
     res.json(user);
   } catch (err) {
-    next(new ErrorResponse('Failed to retrieve', 500));
+    return res.status(500).send(err);
   }
 };
 
