@@ -132,12 +132,7 @@ const getAllUsersForMatch = async (req, res, next) => {
     console.log(`Populated matches: ${populatedMatches.length}`);
 
     if (populatedMatches.length === 0) {
-      return res.status(200).json({
-        totalMatches: 0,
-        totalPages: 0,
-        currentPage: 0,
-        matches: 0,
-      });
+      return res.status(404).json({ message: 'No matches found' });
     }
 
     // Sort matches by distance, then age, then matching interests count
