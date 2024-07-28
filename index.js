@@ -8,12 +8,14 @@ const routes = require('./routes');
 //const User = require('./models/User');
 //const Message = require('./models/Message');
 const Like = require('./models/Like');
+const SuperLike = require('./models/SuperLike');
 const User = require('./models/User');
 const ChatMessageModel = require('./models/ChatMessage');
 const ChatRoom = require('./models/ChatRoom');
 const ChatMessage = require('./models/ChatMessage');
 const Match = require('./models/Match');
 const Skip = require('./models/SkipUser');
+const { ActionHistory } = require('./models/ActionHistory.js');
 //const Room = require('./models/Room');
 
 const app = express();
@@ -38,7 +40,7 @@ const port = process.env.PORT || 3000;
 const server = http.createServer(app);
 const io = socketio(server, {
   cors: {
-    origin: 'http://192.168.0.100:3000',
+    origin: 'http://192.168.1.16:3000',
     methods: ['GET', 'POST'],
   },
 });
@@ -156,6 +158,13 @@ likesNamespace.on('connection', client => {
     }
     try {
       const existingSkip = await Skip.findOne({ userId, skippedUserId });
+      const history = new ActionHistory({
+        userId,
+        actionType: 'skip',
+        targetUserId: skippedUserId,
+      });
+      await history.save();
+      console.log('skphistory', history);
       console.log('existingSkip', existingSkip);
       if (existingSkip) {
         likesNamespace.emit('skip', 'Already Skiped');
@@ -186,7 +195,14 @@ likesNamespace.on('connection', client => {
       } else {
         const like = new Like({ userId, likedUserId });
         await like.save();
+        const history = new ActionHistory({
+          userId,
+          actionType: 'like',
+          targetUserId: likedUserId,
+        });
+        await history.save();
         console.log('creLike', like);
+        console.log('history', history);
         // Emit like event back to client
         likesNamespace.emit('like', { userId, likedUserId });
       }
@@ -215,6 +231,67 @@ likesNamespace.on('connection', client => {
         likesNamespace
           .to(likedUserId.toString())
           .emit('match', { user1: userId, user2: likedUserId });
+        console.log('Match');
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  });
+
+  //Super Like Handling
+  client.on('superLike', async ({ userId, superLikedUserId }) => {
+    console.log('superLikedUserId', superLikedUserId);
+    if (!userId || !superLikedUserId) {
+      likesNamespace.emit('superLike', 'Invalid userId or superLikedUserId');
+      return;
+    }
+    try {
+      const existingSupLike = await SuperLike.findOne({
+        userId,
+        superLikedUserId,
+      });
+      console.log('existingSupLike', existingSupLike);
+      if (existingSupLike) {
+        likesNamespace.emit('superLike', 'Already Super Liked');
+      } else {
+        const like = new SuperLike({ userId, superLikedUserId });
+        await like.save();
+        const history = new ActionHistory({
+          userId,
+          actionType: 'superlike',
+          targetUserId: superLikedUserId,
+        });
+        await history.save();
+        console.log('suphistory', history);
+        console.log('cresupLike', like);
+        // Emit like event back to client
+        likesNamespace.emit('superLike', { userId, superLikedUserId });
+      }
+
+      // Check if there's a match
+      const reciprocalLike = await SuperLike.findOne({
+        userId: superLikedUserId,
+        superLikedUserId: userId,
+      });
+      console.log('reciprocalLike', reciprocalLike);
+      if (reciprocalLike) {
+        const newMatch = new Match({ user1: userId, user2: superLikedUserId });
+        console.log('new', newMatch);
+        await newMatch.save();
+
+        // Notify both users about the match
+        console.log('userId', userId);
+        console.log('superLikedUserId', superLikedUserId);
+
+        client.join(userId.toString());
+        client.join(superLikedUserId.toString());
+
+        likesNamespace
+          .to(userId.toString())
+          .emit('match', { user1: userId, user2: superLikedUserId });
+        likesNamespace
+          .to(superLikedUserId.toString())
+          .emit('match', { user1: userId, user2: superLikedUserId });
         console.log('Match');
       }
     } catch (err) {

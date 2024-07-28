@@ -21,7 +21,7 @@ const preferencesSchema = new mongoose.Schema({
   },
   preferred_gender: {
     type: String,
-    enum: ['male', 'female', 'non-binary', 'other'],
+    enum: ['male', 'female', 'both'],
   },
   preferred_distance: Number,
   preferred_interests: [String],

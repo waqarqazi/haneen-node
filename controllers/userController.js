@@ -1,6 +1,7 @@
 /* eslint-disable */
-const Album = require('../models/Album.js');
+const Media = require('../models/Media.js');
 const Like = require('../models/Like.js');
+const SuperLike = require('../models/SuperLike.js');
 const Match = require('../models/Match.js');
 const Skip = require('../models/SkipUser.js');
 const User = require('../models/User.js');
@@ -61,7 +62,14 @@ const getAllUsersForMatch = async (req, res, next) => {
       'likedUserId',
     );
     const likedUserIds = likedUsers.map(like => like.likedUserId.toString());
-    console.log(`Liked users: ${likedUserIds}`);
+
+    // Find users liked by the current user
+    const superLikedUsers = await SuperLike.find({ userId: userId }).select(
+      'superLikedUserId',
+    );
+    const superLikedUserIds = superLikedUsers.map(like =>
+      like.superLikedUserId.toString(),
+    );
 
     // Find users skipped by the current user
     const skippedUsers = await Skip.find({ userId: userId }).select(
@@ -91,7 +99,12 @@ const getAllUsersForMatch = async (req, res, next) => {
     const totalPotentialMatches = await User.countDocuments({
       _id: {
         $ne: userId,
-        $nin: [...skippedUserIds, ...likedUserIds, ...matchedUserIds],
+        $nin: [
+          ...skippedUserIds,
+          ...likedUserIds,
+          ...superLikedUserIds,
+          ...matchedUserIds,
+        ],
       },
       gender: user.preferences.preferred_gender,
     });
@@ -102,7 +115,12 @@ const getAllUsersForMatch = async (req, res, next) => {
     const users = await User.find({
       _id: {
         $ne: userId,
-        $nin: [...skippedUserIds, ...likedUserIds, ...matchedUserIds],
+        $nin: [
+          ...skippedUserIds,
+          ...likedUserIds,
+          ...superLikedUserIds,
+          ...matchedUserIds,
+        ],
       },
       gender: user.preferences.preferred_gender,
     })
@@ -121,11 +139,11 @@ const getAllUsersForMatch = async (req, res, next) => {
 
     console.log(`Paginated matches: ${users.length}`);
 
-    // Populate albums for potential matches
+    // Populate media for potential matches
     const populatedMatches = await Promise.all(
       users.map(async match => {
-        const albums = await Album.find({ user: match._id });
-        return { ...match, albums };
+        const media = await Media.find({ user: match._id });
+        return { ...match, media };
       }),
     );
 
@@ -208,21 +226,38 @@ const createUser = async (req, res, next) => {
 
 // Update a user
 const updateUser = async (req, res, next) => {
-  const { username, email, password } = req.body;
-
+  const { first_name, last_name, preferences } = req.body;
+  const userId = req.body.user._id;
   try {
-    let user = await User.findById(req.params.id);
+    let user = await User.findById(userId);
 
     if (!user) {
       return res.status(404).json({ msg: 'User not found' });
     }
 
-    user.username = username || user.username;
-    user.email = email || user.email;
-    user.password = password || user.password;
+    user.first_name = first_name || user.first_name;
+    user.last_name = last_name || user.last_name;
+    if (preferences) {
+      const { preferred_distance, preferred_age_range, preferred_gender } =
+        preferences;
+      if (preferred_gender !== undefined) {
+        user.preferences.preferred_gender = preferred_gender;
+      }
+      if (preferred_distance !== undefined) {
+        user.preferences.preferred_distance = preferred_distance;
+      }
+
+      if (
+        preferred_age_range !== undefined &&
+        Array.isArray(preferred_age_range) &&
+        preferred_age_range.length === 2
+      ) {
+        user.preferences.preferred_age_range = preferred_age_range;
+      }
+    }
 
     await user.save();
-    res.json(user);
+    res.json({ success: true, data: user });
   } catch (err) {
     next(new ErrorResponse('Failed to retrieve', 500));
   }
