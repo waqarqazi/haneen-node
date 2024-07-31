@@ -6,19 +6,7 @@ const Match = require('../models/Match.js');
 const Skip = require('../models/SkipUser.js');
 const User = require('../models/User.js');
 const ErrorResponse = require('../utils/errorResponse.js');
-const calculateAge = dateOfBirth => {
-  const today = new Date();
-  const birthDate = new Date(dateOfBirth);
-  let age = today.getFullYear() - birthDate.getFullYear();
-  const monthDiff = today.getMonth() - birthDate.getMonth();
-  if (
-    monthDiff < 0 ||
-    (monthDiff === 0 && today.getDate() < birthDate.getDate())
-  ) {
-    age--;
-  }
-  return age;
-};
+const { calculateAge } = require('../utils/helpers.js');
 
 const getDistance = (location1, location2) => {
   const { latitude: lat1, longitude: lon1 } = location1;
@@ -107,6 +95,7 @@ const getAllUsersForMatch = async (req, res, next) => {
         ],
       },
       gender: user.preferences.preferred_gender,
+      basicProfileStatus: true,
     });
 
     console.log(`Total potential matches: ${totalPotentialMatches}`);
@@ -123,14 +112,19 @@ const getAllUsersForMatch = async (req, res, next) => {
         ],
       },
       gender: user.preferences.preferred_gender,
+      basicProfileStatus: true,
     })
       .skip((page - 1) * limit)
       .limit(limit)
       .lean(); // .lean() to get plain JS object
 
     users.forEach(u => {
-      u.age = calculateAge(u.date_of_birth);
-      u.distance = getDistance(user.location, u.location); // Calculate distance
+      u.age = calculateAge(u.dob);
+      if (user.location && u.location) {
+        u.distance = getDistance(user.location, u.location);
+      } else {
+        u.distance = null; // or some default value if location is missing
+      }
       u.matchingInterestsCount = getMatchingInterestsCount(
         user.preferences.preferred_interests,
         u.interests,

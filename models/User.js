@@ -11,6 +11,7 @@ const locationSchema = new mongoose.Schema({
 });
 const preferencesSchema = new mongoose.Schema({
   preferred_age_range: {
+    required: false,
     type: [Number],
     validate: {
       validator: function (v) {
@@ -23,18 +24,28 @@ const preferencesSchema = new mongoose.Schema({
     type: String,
     enum: ['male', 'female', 'both'],
   },
-  preferred_distance: Number,
-  preferred_interests: [String],
+  preferred_distance: {
+    type: Number,
+    required: false, // explicitly state that this field is optional
+  },
+  preferred_interests: {
+    type: [String],
+    required: false, // explicitly state that this field is optional
+  },
 });
 const userSchema = new mongoose.Schema({
-  username: { type: String, required: true, unique: true },
-  email: { type: String, required: false, unique: false },
+  username: { type: String, unique: true, sparse: true },
+  email: { type: String, unique: true, sparse: true },
   password: { type: String, required: false },
-  ph_number: { type: String, required: false, unique: true },
+  ph_number: { type: String, unique: true, sparse: true },
   first_name: String,
   last_name: String,
-  date_of_birth: Date,
-  gender: String,
+  nickName: String,
+  dob: Date,
+  gender: {
+    type: String,
+    enum: ['male', 'female'],
+  },
   sexual_orientation: String,
   bio: String,
   profile_picture: String,
@@ -51,14 +62,19 @@ const userSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
+  basicProfileStatus: {
+    type: Boolean,
+    default: false,
+  },
+  otp: { type: String, required: false },
   resetPasswordOTP: String,
   resetPasswordExpire: Date,
 });
 // Virtual property to calculate age
 userSchema.virtual('age').get(function () {
-  if (!this.date_of_birth) return null;
+  if (!this.dob) return null;
   const today = new Date();
-  const birthDate = new Date(this.date_of_birth);
+  const birthDate = new Date(this.dob);
   let age = today.getFullYear() - birthDate.getFullYear();
   const monthDiff = today.getMonth() - birthDate.getMonth();
   if (

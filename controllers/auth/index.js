@@ -79,57 +79,69 @@ const signUpStepZero = async (req, res) => {
   }
 };
 const sendOtpApi = async (req, res) => {
+  let phoneNumber = req.body.ph_number;
   try {
-    const prevUser = await User.findOne({ ph_number: req.body.ph_number });
-    if (prevUser) {
-      return res.json({ otp: 'test', detail: 'User Exist' });
+    // const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const otp = 123456;
+    // await sendOtp(phoneNumber, otp); //Use twillo service
+
+    // Save user with OTP (will update later after verification)
+    let user = await User.findOne({ ph_number: phoneNumber });
+    if (!user) {
+      user = new User({ ph_number: phoneNumber, otp });
+      await user.save();
+    } else {
+      user.otp = otp;
+      await user.save();
     }
-    return res.json({ otp: 'test' });
+    return res.status(200).json({
+      success: true,
+      otp,
+      _id: user._id,
+      message: 'OTP verified successfully',
+    });
   } catch (error) {
     console.log('error', error);
-    return res.status(500).send(error);
+    return res.status(500).json({ error: 'Failed to send OTP' });
   }
 };
 const verifyOtpApi = async (req, res) => {
+  const { ph_number, userId, otp } = req.body;
   try {
-    const prevUser = await User.findOne({ ph_number: req.body.ph_number });
-    if (prevUser) {
-      if (prevUser.otpVerified) {
-        return res.json({ otpDetails: 'Already Verified' });
-      }
+    const user = await User.findOne({ ph_number, _id: userId });
+    if (!user || user.otp !== otp) {
+      return res.status(400).json({ error: 'Invalid OTP' });
     }
-    const otpDetails = await verifyOTP(req.body.ph_number, req.body.otp);
-    if (otpDetails.status == 'approved') {
-      const updatedUser = await User.findOneAndUpdate(
-        { ph_number: req.body.ph_number },
-        {
-          $set: { otpVerified: true },
-        },
-        {
-          new: true, // Return the updated document
-          upsert: true, // Create a new document if none is found
-          setDefaultsOnInsert: true, // Apply default values if a new document is created
-        },
-      )
-        .lean()
-        .exec();
-      return res.json({
-        otpDetails,
-        updatedUser,
-      });
+    if (user.otp == otp) {
+      user.isVerified = true;
+      await user.save();
+      res
+        .status(200)
+        .json({ success: true, message: 'OTP verified successfully' });
     }
-    return res.json({ otpDetails });
   } catch (error) {
     console.log('error', error);
     return res.status(500).send(error);
   }
 };
-const addRemainDetails = async (req, res) => {
-  console.log('id', req.body.user._id);
+const createSignupProfile = async (req, res) => {
+  const { userId, password, ...updateFields } = req.body; // Extract userId, password, and other fields
+
   try {
-    const user = await User.findByIdAndUpdate(req.body.user._id, req.body, {
-      new: true, // Return the updated document
-      runValidators: true, // Validate the update operation
+    // Check if the user exists
+    const prevUser = await User.findById(userId);
+    if (!prevUser) {
+      return res.status(401).json({ error: 'User Not Exist' });
+    }
+
+    if (password) {
+      const passwordHash = await bcrypt.hash(password, 10);
+      updateFields.password = passwordHash;
+    }
+
+    const user = await User.findByIdAndUpdate(userId, updateFields, {
+      new: true,
+      runValidators: true,
     })
       .lean()
       .exec();
@@ -137,12 +149,22 @@ const addRemainDetails = async (req, res) => {
     if (!user) {
       return res.status(404).send({ message: 'User not found' });
     }
-    return res.status(200).json({ user, success: true });
+
+    if (user.password) {
+      delete user.password;
+    }
+    const token = await User.findById(userId).exec(); // Retrieve full user data to generate token
+    if (!token) {
+      return res.status(500).json({ message: 'Failed to generate token' });
+    }
+    const authToken = token.generateAuthToken();
+    return res.status(200).json({ user, token: authToken, success: true });
   } catch (error) {
     console.error('Error:', error);
     return res.status(500).send({ message: 'Internal server error', error });
   }
 };
+
 const forgotPassword = async (req, res) => {
   try {
     const user = await User.findOne({ ph_number: req.body.ph_number });
@@ -213,14 +235,14 @@ const checkUserExists = async (req, res) => {
     }).select('+password');
 
     if (!user)
-      return res.status(404).json({
+      return res.status(201).json({
         success: false,
-        status: 'user not exist',
+        status: 'User not Exist',
       });
 
     return res.status(200).json({
       success: true,
-      status: 'user exist',
+      basicProfileStatus: user.basicProfileStatus,
     });
   } catch (error) {
     console.log('error', error);
@@ -257,7 +279,7 @@ module.exports = {
   signUpStepZero,
   sendOtpApi,
   verifyOtpApi,
-  addRemainDetails,
+  createSignupProfile,
   forgotPassword,
   logout,
   checkUserExists,
