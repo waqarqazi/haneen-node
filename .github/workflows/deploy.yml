@@ -16,31 +16,27 @@ jobs:
       - name: List files for debugging
         run: ls -al
 
-      - name: List files in docker folder for debugging
-        run: ls -al docker
-
       - name: Set up SSH
         uses: webfactory/ssh-agent@v0.5.3
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-      - name: Copy docker-compose file to server
+      - name: Copy files to server
         run: |
-          scp -o StrictHostKeyChecking=no ./docker/docker-compose.prod.yml ${{ secrets.AWS_USER }}@${{ secrets.AWS_HOST }}:/home/${{ secrets.AWS_USER }}/docker-compose.yml
+          scp -o StrictHostKeyChecking=no -r . waqarhussain4154@${{ secrets.AWS_HOST }}:/home/waqarhussain4154/app
 
       - name: Create .env file on server
         run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.AWS_USER }}@${{ secrets.AWS_HOST }} << 'EOF'
-            echo "NODE_ENV=${{ secrets.NODE_ENV }}" > /home/${{ secrets.AWS_USER }}/.env
-            echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" >> /home/${{ secrets.AWS_USER }}/.env
+          ssh -o StrictHostKeyChecking=no waqarhussain4154@${{ secrets.AWS_HOST }} << 'EOF'
+            echo "NODE_ENV=${{ secrets.NODE_ENV }}" > /home/waqarhussain4154/app/.env
+            echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" >> /home/waqarhussain4154/app/.env
             # Add other environment variables as needed
           EOF
 
       - name: Deploy to server
         run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.AWS_USER }}@${{ secrets.AWS_HOST }} << 'EOF'
-            cd /home/${{ secrets.AWS_USER }}
-            docker-compose down
-            docker-compose pull
-            docker-compose up -d
+          ssh -o StrictHostKeyChecking=no waqarhussain4154@${{ secrets.AWS_HOST }} << 'EOF'
+            cd /home/waqarhussain4154/app
+            docker-compose -f docker/docker-compose.prod.yml build
+            docker-compose -f docker/docker-compose.prod.yml up -d
           EOF
