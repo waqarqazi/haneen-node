@@ -7,9 +7,11 @@ WORKDIR /usr/src/app
 # Copy package.json and package-lock.json
 COPY package*.json ./
 
-# Clear NPM cache and install dependencies
-RUN npm cache clean --force
+# Install dependencies
 RUN npm install
+
+# Install nodemon globally
+RUN npm install -g nodemon
 
 # Copy the rest of the application code
 COPY . .
