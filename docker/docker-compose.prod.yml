@@ -10,4 +10,4 @@ services:
       - ../.env
     environment:
       NODE_ENV: ${PROD_NODE_ENV}
-      DATABASE_URL: ${PROD_DATABASE_URL}
+      DEV_DATABASE_URL: ${PROD_DEV_DATABASE_URL}

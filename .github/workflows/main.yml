@@ -27,7 +27,7 @@ jobs:
           ssh -o StrictHostKeyChecking=no ubuntu@${{ secrets.EC2_HOST }} << 'EOF'
           cd /home/ubuntu/app
           echo "NODE_ENV=${{ secrets.DEV_NODE_ENV }}" > .env
-          echo "DATABASE_URL=${{ secrets.DEV_DATABASE_URL }}" >> .env
+          echo "DEV_DATABASE_URL=${{ secrets.DEV_DEV_DATABASE_URL }}" >> .env
 
           # Clean Docker environment
           docker-compose -f docker/docker-compose.dev.yml down

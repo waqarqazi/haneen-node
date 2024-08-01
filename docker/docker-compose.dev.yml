@@ -8,6 +8,6 @@ services:
       - "3000:3000"
     environment:
       NODE_ENV: ${NODE_ENV}
-      DATABASE_URL: ${DATABASE_URL}
+      DEV_DATABASE_URL: ${DEV_DATABASE_URL}
     volumes:
       - ..:/usr/src/app
