@@ -1,21 +1,19 @@
-# Use an official Node.js runtime as the base image
-FROM node:20
+FROM node:16
 
-# Create and change to the app directory
+# Create app directory
 WORKDIR /usr/src/app
 
-# Copy application dependency manifests to the container image
+# Install app dependencies
 # A wildcard is used to ensure both package.json AND package-lock.json are copied
+# where available (npm@5+)
 COPY package*.json ./
 
-# Install dependencies
 RUN npm install
+# If you are building your code for production
+# RUN npm ci --only=production
 
-# Copy application code to the container image
+# Bundle app source
 COPY . .
 
-# Expose the port the app runs on
 EXPOSE 8080
-
-# Run the web service on container startup
-CMD [ "npm", "start" ]
+CMD [ "node", "server.js" ]
