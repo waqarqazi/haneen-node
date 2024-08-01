@@ -7,27 +7,15 @@ on:
       - completed
 
 jobs:
+
   build:
+
     runs-on: self-hosted
 
     steps:
-    - name: Free up disk space
-      run: sudo docker system prune -a -f
-
     - name: Pull Docker image
       run: sudo docker pull waqarhussain4154/hannen-node:latest
-
     - name: Delete Old docker container
       run: sudo docker rm -f hannen-node || true
-
     - name: Run Docker Container
-      env:
-        PORT: ${{ secrets.PORT }}
-        MONGO_URI: ${{ secrets.MONGO_URI }}
-        JWT_SECRET: ${{ secrets.JWT_SECRET }}
-      run: |
-        sudo docker run -d -p $PORT:$PORT --name hannen-node \
-        -e PORT=$PORT \
-        -e MONGO_URI=$MONGO_URI \
-        -e JWT_SECRET=$JWT_SECRET \
-        waqarhussain4154/hannen-node:latest
+      run: sudo docker run -d -p 8080:8080 --name hannen-node waqarhussain4154/hannen-node
