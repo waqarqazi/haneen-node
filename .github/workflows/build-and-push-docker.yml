@@ -31,4 +31,4 @@ jobs:
           context: .
           file: ./Dockerfile # Specify the path to the Dockerfile
           push: true
-          tags: your-dockerhub-username/your-app:latest
+          tags: waqarhussain4154/hannen-node
