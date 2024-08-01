@@ -13,6 +13,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
+      - name: List files for debugging
+        run: ls -al
+
+      - name: List files in docker folder for debugging
+        run: ls -al docker
+
       - name: Set up SSH
         uses: webfactory/ssh-agent@v0.5.3
         with:
@@ -20,8 +26,8 @@ jobs:
 
       - name: Copy docker-compose file to server
         run: |
-          scp -o StrictHostKeyChecking=no docker-compose.prod.yml ${{ secrets.AWS_USER }}@${{ secrets.AWS_HOST }}:/home/${{ secrets.AWS_USER }}/docker-compose.yml
-          scp -o StrictHostKeyChecking=no .env ${{ secrets.AWS_USER }}@${{ secrets.AWS_HOST }}:/home/${{ secrets.AWS_USER }}/.env
+          scp -o StrictHostKeyChecking=no ./docker/docker-compose.prod.yml ${{ secrets.AWS_USER }}@${{ secrets.AWS_HOST }}:/home/${{ secrets.AWS_USER }}/docker-compose.yml
+          scp -o StrictHostKeyChecking=no ./.env ${{ secrets.AWS_USER }}@${{ secrets.AWS_HOST }}:/home/${{ secrets.AWS_USER }}/.env
 
       - name: Deploy to server
         run: |
