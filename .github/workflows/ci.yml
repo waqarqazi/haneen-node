@@ -23,4 +23,4 @@ jobs:
     - name: Build the Docker image
       run: docker build -t waqarhussain4154/hannen-node .
     - name: Push to Dockerhub
-      run: docker push waqarhussain4154/haneen-node:latest
+      run: docker push waqarhussain4154/hanneen-node:latest
