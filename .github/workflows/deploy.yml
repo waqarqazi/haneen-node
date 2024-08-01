@@ -23,7 +23,7 @@ jobs:
 
       - name: Copy files to server
         run: |
-          rsync -avz -e "ssh -o StrictHostKeyChecking=no" --exclude '.git' --exclude '.github' ./ ubuntu@${{ secrets.AWS_HOST }}:/home/ubuntu/app
+          rsync -avz -e "ssh -o StrictHostKeyChecking=no" --exclude '.git' --exclude '.github' --exclude 'node_modules' ./ ubuntu@${{ secrets.AWS_HOST }}:/home/ubuntu/app
 
       - name: Create .env file on server
         run: |
@@ -36,7 +36,8 @@ jobs:
       - name: Clean up previous Docker containers and images
         run: |
           ssh -o StrictHostKeyChecking=no ubuntu@${{ secrets.AWS_HOST }} << 'EOF'
-            docker-compose -f /home/ubuntu/app/docker/docker-compose.prod.yml down
+            cd /home/ubuntu/app
+            docker-compose -f docker/docker-compose.prod.yml down
             docker system prune -af
           EOF
 
