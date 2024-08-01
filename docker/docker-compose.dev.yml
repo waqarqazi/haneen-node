@@ -6,10 +6,8 @@ services:
       dockerfile: docker/Dockerfile
     ports:
       - "3000:3000"
-    env_file:
-      - ../.env
     environment:
-      NODE_ENV: ${DEV_NODE_ENV}
-      DATABASE_URL: ${DEV_DATABASE_URL}
+      NODE_ENV: ${NODE_ENV}
+      DATABASE_URL: ${DATABASE_URL}
     volumes:
       - ..:/usr/src/app
