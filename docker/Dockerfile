@@ -13,5 +13,4 @@ COPY . .
 
 EXPOSE 3000
 
-# Use nodemon for development
 CMD ["npx", "nodemon", "index.js"]
