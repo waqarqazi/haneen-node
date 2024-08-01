@@ -1,8 +1,7 @@
 /* eslint-disable camelcase */
 /* eslint-disable */
-
-require('dotenv').config();
 const mongoose = require('mongoose');
+require('dotenv').config();
 mongoose.set('strictQuery', false);
 const dbConnection = async () => {
   try {
