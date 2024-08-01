@@ -12,13 +12,17 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
-    - name: Login Dockerhub
+    
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2
+      
+    - name: Login to Docker Hub
       env:
         DOCKER_USERNAME: ${{secrets.DOCKER_USERNAME}}
         DOCKER_PASSWORD: ${{secrets.DOCKER_PASSWORD}}
-      run: docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
-      
-    - name: Build the Docker image
-      run: docker build --build-arg PORT=${{secrets.PORT}} --build-arg MONGO_URI=${{secrets.MONGO_URI}} --build-arg JWT_SECRET=${{secrets.JWT_SECRET}} -t waqarhussain4154/hannen-node .
-    - name: Push to Dockerhub
-      run: docker push waqarhussain4154/hannen-node:latest
+      run: echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
+    
+    - name: Build and push Docker image
+      run: |
+        docker buildx create --use
+        docker buildx build --build-arg PORT=${{secrets.PORT}} --build-arg MONGO_URI=${{secrets.MONGO_URI}} --build-arg JWT_SECRET=${{secrets.JWT_SECRET}} -t waqarhussain4154/hannen-node --push .
