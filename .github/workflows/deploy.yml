@@ -23,7 +23,7 @@ jobs:
 
       - name: Copy files to server
         run: |
-          scp -o StrictHostKeyChecking=no -r . ubuntu@${{ secrets.AWS_HOST }}:/home/ubuntu/app
+          rsync -avz --exclude '.git' --exclude '.github' ./ ubuntu@${{ secrets.AWS_HOST }}:/home/ubuntu/app
 
       - name: Create .env file on server
         run: |
