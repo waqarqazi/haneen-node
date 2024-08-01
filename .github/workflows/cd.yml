@@ -11,6 +11,9 @@ jobs:
     runs-on: self-hosted
 
     steps:
+    - name: Free up disk space
+      run: sudo docker system prune -a -f
+
     - name: Pull Docker image
       run: sudo docker pull waqarhussain4154/hannen-node:latest
 
