@@ -494,4 +494,4 @@ io.on('connection', client => {
   });
 });
 
-server.listen(port, () => console.log(`Listning on portt ${port}...`));
+server.listen(port, () => console.log(`Listning on port ${port}...`));
