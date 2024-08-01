@@ -7,10 +7,10 @@ mongoose.set('strictQuery', false);
 const dbConnection = async () => {
   try {
     let db_url = '';
-    if (process.env.MONGO_URI) {
-      db_url = process.env.MONGO_URI;
+    if (process.env.DEV_DATABASE_URL) {
+      db_url = process.env.DEV_DATABASE_URL;
     } else {
-      db_url = process.env.MONGO_URI;
+      db_url = process.env.DEV_DATABASE_URL;
     }
     const connected = await mongoose.connect(db_url, {
       useNewUrlParser: true,
