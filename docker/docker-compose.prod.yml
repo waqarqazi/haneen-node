@@ -1,13 +1,10 @@
-version: '3'
+version: '3.8'
+
 services:
   app:
-    build:
-      context: ..
-      dockerfile: docker/Dockerfile
+    image: your-dockerhub-username/your-app:latest
     ports:
-      - "3000:3000"
-    env_file:
-      - ../.env
+      - "80:3000"
     environment:
-      NODE_ENV: ${PROD_NODE_ENV}
-      DATABASE_URL: ${PROD_DATABASE_URL}
+      - NODE_ENV=production
+    command: npm run start:prod

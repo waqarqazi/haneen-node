@@ -1,0 +1,33 @@
+name: Deploy to AWS
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up SSH
+        uses: webfactory/ssh-agent@v0.5.3
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Copy docker-compose file to server
+        run: |
+          scp -o StrictHostKeyChecking=no docker-compose.prod.yml ${{ secrets.AWS_USER }}@${{ secrets.AWS_HOST }}:/home/${{ secrets.AWS_USER }}/docker-compose.yml
+          scp -o StrictHostKeyChecking=no .env ${{ secrets.AWS_USER }}@${{ secrets.AWS_HOST }}:/home/${{ secrets.AWS_USER }}/.env
+
+      - name: Deploy to server
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ secrets.AWS_USER }}@${{ secrets.AWS_HOST }} << 'EOF'
+            cd /home/${{ secrets.AWS_USER }}
+            docker-compose down
+            docker-compose pull
+            docker-compose up -d
+          EOF

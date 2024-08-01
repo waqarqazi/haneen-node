@@ -1,13 +1,13 @@
-version: '3'
+version: '3.8'
+
 services:
   app:
-    build:
-      context: ..
-      dockerfile: docker/Dockerfile
+    build: .
     ports:
       - "3000:3000"
     environment:
-      NODE_ENV: ${NODE_ENV}
-      DEV_DATABASE_URL: ${DEV_DATABASE_URL}
+      - NODE_ENV=development
     volumes:
-      - ..:/usr/src/app
+      - .:/app
+      - /app/node_modules
+    command: npm start
