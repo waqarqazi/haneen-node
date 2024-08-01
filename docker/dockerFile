@@ -8,7 +8,10 @@ WORKDIR /usr/src/app
 COPY package*.json ./
 
 # Install dependencies
-RUN npm install
+RUN npm install || { cat /usr/src/app/npm-debug.log; exit 1; }
+
+# Verify that node_modules is created
+RUN if [ -d "node_modules" ]; then echo "node_modules directory exists"; else echo "node_modules directory does not exist"; fi
 
 # Copy the rest of the application code to the working directory
 COPY . .
