@@ -34,5 +34,6 @@ jobs:
           docker system prune -a --volumes -f
 
           # Rebuild and start containers
-          docker-compose -f docker/docker-compose.dev.yml up --build -d
+          docker-compose -f docker/docker-compose.dev.yml build --no-cache
+          docker-compose -f docker/docker-compose.dev.yml up -d
           EOF
