@@ -25,9 +25,14 @@ jobs:
       - name: SSH into EC2 and Deploy
         run: |
           ssh -o StrictHostKeyChecking=no ubuntu@${{ secrets.EC2_HOST }} << 'EOF'
-          mkdir -p /home/ubuntu/app
           cd /home/ubuntu/app
           echo "NODE_ENV=${{ secrets.DEV_NODE_ENV }}" > .env
           echo "DATABASE_URL=${{ secrets.DEV_DATABASE_URL }}" >> .env
+
+          # Clean Docker environment
+          docker-compose -f docker/docker-compose.dev.yml down
+          docker system prune -a --volumes -f
+
+          # Rebuild and start containers
           docker-compose -f docker/docker-compose.dev.yml up --build -d
           EOF
