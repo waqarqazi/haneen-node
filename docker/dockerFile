@@ -1,5 +1,5 @@
 # Use the official Node.js 20.13.1 image as the base image
-FROM node:20.13.1
+FROM node:20
 
 # Set the working directory inside the container
 WORKDIR /usr/src/app
@@ -8,10 +8,7 @@ WORKDIR /usr/src/app
 COPY package*.json ./
 
 # Install dependencies
-RUN npm install || { cat /usr/src/app/npm-debug.log; exit 1; }
-
-# Verify that node_modules is created
-RUN if [ -d "node_modules" ]; then echo "node_modules directory exists"; else echo "node_modules directory does not exist"; fi
+RUN npm install
 
 # Copy the rest of the application code to the working directory
 COPY . .
