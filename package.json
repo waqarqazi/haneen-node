@@ -7,6 +7,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "nodemon index.js",
+    "dev": "nodemon index.js",
     "start-prod": "export NODE_ENV=production && node index.js",
     "pm2": "pm2 stop 0 && pm2 start index.js"
   },

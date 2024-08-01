@@ -1,23 +1,17 @@
-# Use the official Node.js image as a base
-FROM node:20
+FROM node:20.13.1
 
-# Set the working directory
+# Create app directory
 WORKDIR /usr/src/app
 
-# Copy package.json and package-lock.json
+# Install app dependencies
 COPY package*.json ./
 
-# Install dependencies
 RUN npm install
 
-# Install nodemon globally
-RUN npm install -g nodemon
-
-# Copy the rest of the application code
+# Bundle app source
 COPY . .
 
-# Expose the port the app runs on
 EXPOSE 3000
 
-# Command to run the application
+# Use nodemon for development
 CMD ["npx", "nodemon", "index.js"]
