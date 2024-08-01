@@ -25,8 +25,13 @@ jobs:
     # - name: Run tests
     #   run: npm test
 
+    - name: Set up Docker Buildx
+      run: |
+        docker buildx create --use
+        docker buildx inspect --bootstrap
+
     - name: Build Docker image
-      run: docker build -t haneen-node:latest .
+      run: docker buildx build --platform linux/amd64 -t haneen-node:latest .
 
     - name: Run Docker container
       run: docker run -d -p 8080:8080 haneen-node:latest
