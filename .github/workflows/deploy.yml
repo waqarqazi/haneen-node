@@ -27,7 +27,14 @@ jobs:
       - name: Copy docker-compose file to server
         run: |
           scp -o StrictHostKeyChecking=no ./docker/docker-compose.prod.yml ${{ secrets.AWS_USER }}@${{ secrets.AWS_HOST }}:/home/${{ secrets.AWS_USER }}/docker-compose.yml
-          scp -o StrictHostKeyChecking=no ./.env ${{ secrets.AWS_USER }}@${{ secrets.AWS_HOST }}:/home/${{ secrets.AWS_USER }}/.env
+
+      - name: Create .env file on server
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ secrets.AWS_USER }}@${{ secrets.AWS_HOST }} << 'EOF'
+            echo "NODE_ENV=${{ secrets.NODE_ENV }}" > /home/${{ secrets.AWS_USER }}/.env
+            echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" >> /home/${{ secrets.AWS_USER }}/.env
+            # Add other environment variables as needed
+          EOF
 
       - name: Deploy to server
         run: |
