@@ -23,20 +23,20 @@ jobs:
 
       - name: Copy files to server
         run: |
-          scp -o StrictHostKeyChecking=no -r . waqarhussain4154@${{ secrets.AWS_HOST }}:/home/waqarhussain4154/app
+          scp -o StrictHostKeyChecking=no -r . ubuntu@${{ secrets.AWS_HOST }}:/home/ubuntu/app
 
       - name: Create .env file on server
         run: |
-          ssh -o StrictHostKeyChecking=no waqarhussain4154@${{ secrets.AWS_HOST }} << 'EOF'
-            echo "NODE_ENV=${{ secrets.NODE_ENV }}" > /home/waqarhussain4154/app/.env
-            echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" >> /home/waqarhussain4154/app/.env
+          ssh -o StrictHostKeyChecking=no ubuntu@${{ secrets.AWS_HOST }} << 'EOF'
+            echo "NODE_ENV=${{ secrets.NODE_ENV }}" > /home/ubuntu/app/.env
+            echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" >> /home/ubuntu/app/.env
             # Add other environment variables as needed
           EOF
 
       - name: Deploy to server
         run: |
-          ssh -o StrictHostKeyChecking=no waqarhussain4154@${{ secrets.AWS_HOST }} << 'EOF'
-            cd /home/waqarhussain4154/app
+          ssh -o StrictHostKeyChecking=no ubuntu@${{ secrets.AWS_HOST }} << 'EOF'
+            cd /home/ubuntu/app
             docker-compose -f docker/docker-compose.prod.yml build
             docker-compose -f docker/docker-compose.prod.yml up -d
           EOF
