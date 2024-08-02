@@ -36,7 +36,7 @@ app.use('/api', routes);
 // require('./startup/route')(app);
 require('./startup/db')();
 
-const port = process.env.PORT || 3000;
+const port = process.env.PORT;
 const server = http.createServer(app);
 const io = socketio(server, {
   cors: {
