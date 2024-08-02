@@ -28,6 +28,11 @@ app.use(
   }),
 );
 
+app.get('*', (req, res) => {
+  console.log('Status runing');
+  return res.status(200).send('Up & Running');
+});
+
 app.use(express.json({ limit: '50mb' }));
 app.use('/api', routes);
 // initializeFirebase();
