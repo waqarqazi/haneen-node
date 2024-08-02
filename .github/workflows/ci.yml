@@ -24,7 +24,12 @@ jobs:
         run: docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
 
       - name: Build the Docker image
-        run: docker build -t waqarhussain4154/hannen-node .
+        run: |
+          IMAGE_TAG="waqarhussain4154/hannen-node:latest"
+          VERSION_TAG="waqarhussain4154/hannen-node:${{ github.sha }}"
+          docker build -t $IMAGE_TAG -t $VERSION_TAG .
 
       - name: Push to Docker Hub
-        run: docker push waqarhussain4154/hannen-node:latest
+        run: |
+          docker push waqarhussain4154/hannen-node:latest
+          docker push waqarhussain4154/hannen-node:${{ github.sha }}
