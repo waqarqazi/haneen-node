@@ -43,8 +43,6 @@ const getAllUsersForMatch = async (req, res, next) => {
       return res.status(404).json({ message: 'User not found' });
     }
 
-    console.log(`User found: ${user.username}`);
-
     // Find users liked by the current user
     const likedUsers = await Like.find({ userId: userId }).select(
       'likedUserId',
