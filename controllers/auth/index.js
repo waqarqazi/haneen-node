@@ -98,7 +98,7 @@ const sendOtpApi = async (req, res) => {
       success: true,
       otp,
       _id: user._id,
-      message: 'OTP verified successfully',
+      message: 'OTP sent successfully',
     });
   } catch (error) {
     console.log('error', error);
