@@ -28,11 +28,6 @@ app.use(
   }),
 );
 
-app.get('*', (req, res) => {
-  console.log('Status runing');
-  return res.status(200).send('Up & Running');
-});
-
 app.use(express.json({ limit: '50mb' }));
 app.use('/api', routes);
 // initializeFirebase();
@@ -43,12 +38,7 @@ require('./startup/db')();
 
 const port = process.env.PORT;
 const server = http.createServer(app);
-const io = socketio(server, {
-  cors: {
-    origin: 'http://192.168.1.16:3000',
-    methods: ['GET', 'POST'],
-  },
-});
+const io = socketio(server);
 global.io = io;
 
 // Socket.io connection handler
