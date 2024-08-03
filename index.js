@@ -52,7 +52,6 @@ const io = socketio(server, {
 global.io = io;
 
 // Socket.io connection handler
-// Socket.io connection handler
 // Socket.io configuration
 // io.on('connection', socket => {
 //   console.log('New client connected');
