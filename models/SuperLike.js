@@ -1,9 +1,9 @@
 const mongoose = require('mongoose');
 const Match = require('./Match'); // Add this line
 
-const likeSchema = new mongoose.Schema({
+const superLikeSchema = new mongoose.Schema({
   userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-  likedUserId: {
+  superLikedUserId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
     required: true,
@@ -13,8 +13,8 @@ const likeSchema = new mongoose.Schema({
 });
 
 // Add a unique compound index to prevent duplicate likes
-likeSchema.index({ userId: 1, likedUserId: 1 }, { unique: true });
+superLikeSchema.index({ userId: 1, superLikedUserId: 1 }, { unique: true });
 
-const Like = mongoose.model('Like', likeSchema);
+const SuperLike = mongoose.model('SuperLike', superLikeSchema);
 
-module.exports = Like;
+module.exports = SuperLike;

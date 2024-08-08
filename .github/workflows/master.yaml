@@ -1,0 +1,21 @@
+name: Run production haneen-node
+on:
+  push:
+    branches: ["main"]
+jobs:
+  deploy:
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@v3
+      - name: Create env file
+        run: |
+          touch .env
+          echo PORT='${{ secrets.PORT }}' >> .env
+          echo MONGO_URI='${{ secrets.MONGO_URI }}' >> .env
+          echo JWT_SECRET='${{ secrets.JWT_SECRET }}' >> .env
+          echo NODE_ENV='${{ secrets.NODE_ENV }}' >> .env
+          cat .env
+      - name: Close previous docker containers
+        run: sudo docker compose -f docker-compose.yml -p haneen-node down
+      - name: Run docker with build
+        run: sudo docker compose -f docker-compose.yml -p haneen-node up --build -d
