@@ -3,8 +3,42 @@ const SuperLike = require('../models/SuperLike');
 const Match = require('../models/Match');
 const Skip = require('../models/SkipUser');
 const { ActionHistory } = require('../models/ActionHistory.js');
+const ChatRoom = require('../models/ChatRoom.js');
 
 let users = [];
+const initiateChatRoomForMatch = async (io, userId, matchedUserId) => {
+  try {
+    const chatRoom = await ChatRoom.initiateChat(
+      [userId, matchedUserId],
+      userId,
+    );
+    const chatRoomId = chatRoom.chatRoomId;
+
+    // Notify both users to join the chat room
+    const userSockets = users.filter(
+      user => user.userId === userId || user.userId === matchedUserId,
+    );
+
+    userSockets.forEach(userInfo => {
+      const socketConn = io.sockets.sockets.get(userInfo.socketId);
+      if (socketConn) {
+        socketConn.join(chatRoomId);
+      }
+    });
+
+    io.to(chatRoomId).emit('OnJoin', {
+      message: `You have matched with a new user!`,
+      chatRoomId,
+      isNew: chatRoom.isNew,
+    });
+
+    console.log(
+      `Chat room initiated for match between User ${userId} and User ${matchedUserId}`,
+    );
+  } catch (error) {
+    console.error('Error initiating chat room for match:', error);
+  }
+};
 
 const likeMatchHandling = io => {
   const likesNamespace = io.of('/likes');
@@ -85,8 +119,8 @@ const likeMatchHandling = io => {
           console.log('userId', userId);
           console.log('likedUserId', likedUserId);
 
-          client.join(userId.toString());
-          client.join(likedUserId.toString());
+          // client.join(userId.toString());
+          // client.join(likedUserId.toString());
 
           likesNamespace
             .to(userId.toString())
@@ -95,6 +129,7 @@ const likeMatchHandling = io => {
             .to(likedUserId.toString())
             .emit('match', { user1: userId, user2: likedUserId });
           console.log('Match');
+          await initiateChatRoomForMatch(io, userId, likedUserId);
         }
       } catch (err) {
         console.error(err);
@@ -159,23 +194,11 @@ const likeMatchHandling = io => {
             .to(superLikedUserId.toString())
             .emit('match', { user1: userId, user2: superLikedUserId });
           console.log('Match');
+          await initiateChatRoomForMatch(io, userId, superLikedUserId);
         }
       } catch (err) {
         console.error(err);
       }
-    });
-
-    // Add identity of user mapped to the socket id
-    client.on('identity', async ({ userId }) => {
-      users.push({
-        socketId: client.id,
-        userId,
-      });
-    });
-
-    client.on('disconnect', () => {
-      users = users.filter(user => user.socketId !== client.id);
-      console.log('onDisconnect', users);
     });
   });
 };

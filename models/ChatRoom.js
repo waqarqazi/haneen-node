@@ -34,9 +34,9 @@ chatRoomSchema.statics.initiateChat = async function (
   description,
 ) {
   try {
-    if (userIds.length !== 2) {
-      throw new Error('A private chat room must have exactly two users');
-    }
+    // if (userIds.length !== 2) {
+    //   throw new Error('A private chat room must have exactly two users');
+    // }
 
     const isAlreadyRoomPrivate = await this.findOne({
       $and: [

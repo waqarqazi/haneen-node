@@ -10,6 +10,7 @@ const setupChatSocket = io => {
     console.log('A user is connected with io ');
     // add identity of user mapped to the socket id
     client.on('identity', async ({ userId }) => {
+      console.log('userId', userId);
       users.push({
         socketId: client.id,
         userId,
@@ -26,6 +27,7 @@ const setupChatSocket = io => {
     client.on(
       'create',
       async ({ otherUserId = [], name, picture, description }) => {
+        console.log('otherUserId', otherUserId);
         console.log('new create event called');
         const { userId } = users.find(el => el.socketId === client.id);
         if (otherUserId.length > 0 && userId) {

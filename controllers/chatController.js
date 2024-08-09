@@ -137,70 +137,67 @@ const getAllChatList = async (req, res) => {
     const { search } = req.query;
     const userId = req.body.user._id;
 
+    console.log('User ID:', userId);
+
     // Fetch all conversations involving the user
     let allConversation = await ChatRoom.find({
       $or: [{ userIds: userId }, { chatInitiator: userId }],
     });
 
+    console.log('Chat Rooms from DB:', allConversation);
+
     if (!allConversation.length) {
       return res.json({ error: 'No Chat Found' });
     }
 
+    // Populate conversation details
     allConversation = await Promise.all(
       allConversation.map(async el => {
         el = el?.toObject();
+        console.log('Conversation Element:', el);
         const secondUserId =
           el.chatInitiator.toString() === userId
-            ? el.userIds[0]
-            : el.chatInitiator;
+            ? el.userIds.find(id => id !== userId)
+            : el.chatInitiator.toString();
+
+        console.log('Second User ID:', secondUserId);
+
         const user = await User.findById(secondUserId);
-        el.picture = user?.profile_picture || '';
-        el.firstName = user?.first_name || '';
-        el.lastName = user?.last_name || '';
-        el.secondUserId = user?._id || '';
-        return el;
-      }),
-    );
+        console.log('Second User Details:', user);
 
-    allConversation = (
-      await Promise.all(
-        allConversation.map(async el => {
-          const messagesCount = await ChatMessageModel.countDocuments({
+        if (user) {
+          el.picture = user.profile_picture || '';
+          el.firstName = user.first_name || '';
+          el.lastName = user.last_name || '';
+          el.secondUserId = user._id || '';
+        }
+
+        // Fetch the last message and unread count, if any
+        el.lastMessage =
+          (await ChatMessageModel.findOne({
             chatRoomId: el._id,
-          });
-          return messagesCount ? el : null;
-        }),
-      )
-    ).filter(e => e);
+          }).sort('-createdAt')) || null; // If no message, set to null
 
-    allConversation = await Promise.all(
-      allConversation.map(async el => {
-        el.lastMessage = await ChatMessageModel.findOne({
-          chatRoomId: el._id,
-        }).sort('-createdAt');
         el.unreadCount = await ChatMessageModel.countDocuments({
           chatRoomId: el._id,
           read: false,
         });
+
         return el;
       }),
     );
 
-    // const totalChatList = await ChatRoom.countDocuments({
-    //   $or: [
-    //     { userIds: { $in: [userId] } },
-    //     { chatInitiator: userId },
-    //   ],
-    // });
-
+    // Filter by search term if provided
     if (search) {
       allConversation = allConversation.filter(el => {
         return (
-          el.first_name.toLowerCase().includes(search.toLowerCase()) ||
+          el.firstName.toLowerCase().includes(search.toLowerCase()) ||
           el.lastName.toLowerCase().includes(search.toLowerCase())
         );
       });
     }
+
+    console.log('Final Chat List:', allConversation);
 
     res.json(allConversation);
   } catch (error) {
@@ -208,6 +205,7 @@ const getAllChatList = async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 };
+
 const markRead = async (req, res) => {
   const { roomId } = req.params;
   if (!roomId) {
