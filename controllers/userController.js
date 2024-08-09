@@ -43,8 +43,6 @@ const getAllUsersForMatch = async (req, res, next) => {
       return res.status(404).json({ message: 'User not found' });
     }
 
-    console.log(`User found: ${user.username}`);
-
     // Find users liked by the current user
     const likedUsers = await Like.find({ userId: userId }).select(
       'likedUserId',
@@ -209,12 +207,19 @@ const getProfile = async (req, res, next) => {
 // Create a new user
 const createUser = async (req, res, next) => {
   try {
-    // Your code to create a user
+    const prevUser = await User.findOne({ username: req.body.username });
+    if (prevUser) {
+      return res.status(401).json({ error: 'UserName Already Exist' });
+    }
+    const prevUserEmail = await User.findOne({ email: req.body.email });
+    if (prevUserEmail) {
+      return res.status(401).json({ error: 'Email Already Exist' });
+    }
     const user = await User.create(req.body);
     res.status(201).json({ success: true, data: user });
   } catch (error) {
     console.error(error);
-    next(new ErrorResponse('Failed to create user', 500));
+    return res.status(500).send({ error });
   }
 };
 
