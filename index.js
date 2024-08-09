@@ -29,11 +29,7 @@ require('./startup/db')();
 
 const port = process.env.PORT;
 const server = http.createServer(app);
-const io = socketio(server, {
-  cors: {
-    origin: 'http://192.168.1.19:3000', // Allow all origins
-  },
-});
+const io = socketio(server);
 global.io = io;
 setupChatSocket(io);
 likeMatchHandling(io);
