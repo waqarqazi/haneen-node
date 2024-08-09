@@ -32,7 +32,7 @@ const register = async (req, res) => {
     const user = await newUser.save();
     let sanitizedUser = _.omit(user.toObject(), 'password');
 
-    return res.json({ user: sanitizedUser });
+    return res.json({ success: true, data: sanitizedUser });
   } catch (error) {
     console.log('error', error);
     return res.status(500).send(error);
