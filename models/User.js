@@ -48,7 +48,7 @@ const userSchema = new mongoose.Schema({
   },
   sexual_orientation: String,
   bio: String,
-  profile_picture: String,
+  profilePicture: String,
   fcm: String,
   interests: [String],
   location: locationSchema,

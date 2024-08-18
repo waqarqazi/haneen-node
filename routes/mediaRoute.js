@@ -5,7 +5,7 @@ const mediaController = require('../controllers/mediaController.js');
 const auth = require('../middleware/authMiddleware.js');
 
 // Create a new hobby
-router.route('/').post(auth, mediaController.createMedia);
+router.route('/').post(auth, mediaController.uploadImages);
 
 // Get all hobbies
 router.route('/').get(auth, mediaController.getHobbies);

@@ -6,7 +6,8 @@ const Match = require('../models/Match.js');
 const Skip = require('../models/SkipUser.js');
 const User = require('../models/User.js');
 const ErrorResponse = require('../utils/errorResponse.js');
-const { calculateAge } = require('../utils/helpers.js');
+const { calculateAge, generateUniqueUsername } = require('../utils/helpers.js');
+const { s3Bucket } = require('../config/aws.js');
 
 const getDistance = (location1, location2) => {
   const { latitude: lat1, longitude: lon1 } = location1;
@@ -134,8 +135,8 @@ const getAllUsersForMatch = async (req, res, next) => {
     // Populate media for potential matches
     const populatedMatches = await Promise.all(
       users.map(async match => {
-        const media = await Media.find({ user: match._id });
-        return { ...match, media };
+        const media = await Media.findOne({ user: match._id }, 'mediaItems');
+        return { ...match, mediaItems: media ? media.mediaItems : [] };
       }),
     );
 
@@ -193,12 +194,22 @@ const getUserById = async (req, res, next) => {
 
 // Get user by ID
 const getProfile = async (req, res, next) => {
+  const userId = req.body.user._id;
   try {
-    const user = await User.findById({ _id: req.body.user._id });
+    // Find the user by ID
+    const user = await User.findById(userId);
+
     if (!user) {
       return res.status(404).json({ msg: 'User not found' });
     }
-    return res.json({ user });
+
+    // Find the media associated with the user
+    const media = await Media.findOne({ user: userId });
+    // Return the user information along with the associated media items (images)
+    return res.json({
+      user,
+      mediaItems: media ? media.mediaItems : [], // Return an empty array if no media is found
+    });
   } catch (err) {
     return res.status(500).send(err);
   }
@@ -225,7 +236,7 @@ const createUser = async (req, res, next) => {
 
 // Update a user
 const updateUser = async (req, res, next) => {
-  const { first_name, last_name, preferences } = req.body;
+  const { first_name, last_name, preferences, profilePicture } = req.body;
   const userId = req.body.user._id;
   try {
     let user = await User.findById(userId);
@@ -236,6 +247,47 @@ const updateUser = async (req, res, next) => {
 
     user.first_name = first_name || user.first_name;
     user.last_name = last_name || user.last_name;
+    // user.profilePicture = profilePicture || user.profilePicture;
+    if (profilePicture) {
+      if (!profilePicture.startsWith('data:image')) {
+        return res.status(400).json({ error: 'profileImage is not correct' });
+      }
+      const buf = Buffer.from(
+        profilePicture.replace(/^data:image\/\w+;base64,/, ''),
+        'base64',
+      );
+
+      if (user.profileImage) {
+        const data = {
+          Key: user.profileImage,
+          Body: buf,
+          ContentEncoding: 'base64',
+          ContentType: 'image/jpeg',
+        };
+        const params = { Bucket: 'haneen', Key: data.Key };
+        await s3Bucket.deleteObject(params).promise();
+      }
+      const uniqueNumber = await generateUniqueUsername('image');
+      const data = {
+        Key: `${userId}-profile-photo-${uniqueNumber}`,
+        Body: buf,
+        ContentEncoding: 'base64',
+        ContentType: 'image/jpeg',
+      };
+
+      // const params = { Bucket: 'casaverse-app', Key: data.Key };
+
+      // await s3Bucket.deleteObject(params).promise();
+
+      s3Bucket.upload(data, async (err, uploadData) => {
+        if (err) {
+          throw err;
+        }
+        console.log(`File uploaded successfully. ${uploadData.Location}`);
+        user.profilePicture = uploadData.Location;
+        await user.save();
+      });
+    }
     if (preferences) {
       const { preferred_distance, preferred_age_range, preferred_gender } =
         preferences;
@@ -258,6 +310,7 @@ const updateUser = async (req, res, next) => {
     await user.save();
     res.json({ success: true, data: user });
   } catch (err) {
+    console.log('error', err);
     next(new ErrorResponse('Failed to retrieve', 500));
   }
 };
