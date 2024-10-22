@@ -6,26 +6,14 @@ const authController = require('../../controllers/auth');
 const {
   validateLogin,
   validateRegister,
-  validateUserExist,
 } = require('../../utils/validation.js');
 const validator = require('../../middleware/validator.js');
-// @route    POST api/auth/register
-// @desc     Register user
-// @access   Public
-router.route('/register').post(validator(validateRegister, 'body'));
-router.route('/signup-step-zero').post(authController.signUpStepZero);
-router.route('/send-otp').post(authController.sendOtpApi);
-router.route('/verify-otp').post(authController.verifyOtpApi);
-router.route('/profile/signup').post(authController.createSignupProfile);
-router.route('/forgot-password').post(authController.forgotPassword);
-router.route('/logout').post(auth, authController.logout);
-router
-  .route('/user-status')
-  .post(validator(validateUserExist, 'body'), authController.checkUserExists);
 
-// @route    POST api/auth/login
-// @desc     Login user
-// @access   Public
+router
+  .route('/register')
+  .post(validator(validateRegister, 'body'), authController.register);
+router.route('/logout').post(auth, authController.logout);
+
 router.route('/login').post(
   (req, res, next) => {
     next();
