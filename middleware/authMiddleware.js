@@ -16,4 +16,3 @@ const authMiddleware = (req, res, next) => {
 
 module.exports = authMiddleware;
 
-// This middleware function should be applied on those api endpoints which is going to be protected.
