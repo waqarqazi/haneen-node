@@ -47,21 +47,19 @@ const login = async (req, res) => {
         .status(400)
         .json({ error: 'Invalid Phone Number or Password' });
 
-    const validatePassword = bcrypt.compare(req.body.password, user.password);
+    const validatePassword = await bcrypt.compare(
+      req.body.password,
+      user.password,
+    );
 
     if (!validatePassword)
       return res
         .status(400)
         .json({ error: 'Invalid Phone Number or Password' });
 
-    // User disabled
-    // if (!user.status)
-    //   return res.status(401).json({ error: 'Your account is Inactive' });
-
     const token = user.generateAuthToken();
 
     let sanitizedUser = _.omit(user.toObject(), 'password');
-    console.log('sanitizedUser', sanitizedUser);
     return res.status(200).json({
       success: true,
       token,
